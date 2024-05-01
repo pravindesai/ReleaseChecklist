@@ -16,7 +16,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AppBar(
-    modifier: Modifier = Modifier,
     navigateUp: () -> Unit = {},
     canNavigateBack: Boolean = false,
     title: String

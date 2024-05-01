@@ -44,6 +44,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
             implementation(libs.compose.ui.tooling.preview)
+            implementation(compose.material3)
             implementation("com.arkivanov.decompose:decompose:2.2.3")
             implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.2.3")
             implementation("io.insert-koin:koin-core:3.2.0")
