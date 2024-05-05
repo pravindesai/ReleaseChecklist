@@ -14,7 +14,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,9 +29,11 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import colors.MAT_DARK
 import colors.asColor
+import kotlinx.coroutines.launch
 import repository.CommonRepository
 import screens.dashboardscreen.DashboardScreen
 import screens.mainscreen.UserSelectionScreen
+import ui.AppProgressBar
 
 class SettingsScreen : Screen {
 
@@ -38,6 +44,8 @@ class SettingsScreen : Screen {
     override fun Content() {
         val coroutineScope = rememberCoroutineScope()
         val tabNavigator = LocalNavigator.currentOrThrow
+        var isLoading by remember { mutableStateOf(false) }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Bottom,
@@ -45,8 +53,17 @@ class SettingsScreen : Screen {
             OutlinedButton(
                 shape = RoundedCornerShape(10),
                 onClick = {
-                    CommonRepository.setCurrentUserType(null)
-                    tabNavigator.parent?.replaceAll(UserSelectionScreen())
+
+                    coroutineScope.launch {
+                        isLoading = true
+                        val isSignedOut = signOut()
+                        if (isSignedOut){
+                            CommonRepository.setCurrentUserType(null)
+                            tabNavigator.parent?.replaceAll(UserSelectionScreen())
+                        }
+                        isLoading = false
+                    }
+
                 },
                 modifier = Modifier.fillMaxWidth().padding(10.dp).wrapContentHeight(),
                 border = BorderStroke(1.dp, color = MAT_DARK.asColor()),
@@ -63,8 +80,17 @@ class SettingsScreen : Screen {
 
             Spacer(modifier = Modifier.height(50.dp))
 
+        }
 
+
+        if (isLoading){
+            AppProgressBar()
         }
 
     }
+
+    private suspend fun signOut():Boolean{
+        return CommonRepository.signOut()
+    }
+
 }

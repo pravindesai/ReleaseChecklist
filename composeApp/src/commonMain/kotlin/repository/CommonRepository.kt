@@ -19,9 +19,14 @@ object CommonRepository {
     suspend fun trySignIn(userId:String, userPassword:String, userType: UserType):Boolean{
         val tempId = "admin"
         val tempPassword = "admin"
-        delay(3.seconds)
+        delay(2.seconds)
 
         return (tempId == userId) and (userPassword == tempPassword)
+    }
+
+    suspend fun signOut():Boolean{
+        delay(2.seconds)
+        return true
     }
 
     suspend fun addUser(user: User):Boolean{
@@ -42,7 +47,6 @@ object CommonRepository {
         )
     }
 
-
     suspend fun addProject(project: Project):Boolean{
         delay(2.seconds)
         return true
@@ -52,8 +56,6 @@ object CommonRepository {
         delay(2.seconds)
         return true
     }
-
-
 
     suspend fun addRelease(releases: Releases):Boolean{
         delay(2.seconds)
