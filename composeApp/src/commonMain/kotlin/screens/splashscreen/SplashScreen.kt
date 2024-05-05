@@ -18,7 +18,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import screens.mainscreen.MainScreen
+import screens.mainscreen.UserSelectionScreen
 import kotlin.time.Duration.Companion.seconds
 
 class SplashScreen : Screen {
@@ -35,7 +35,7 @@ class SplashScreen : Screen {
                     isSplashShowing = isSplashShowing.not()
                 }
             }else{
-                navigator.push(MainScreen())
+                navigator.push(UserSelectionScreen())
             }
         }
         Box(modifier = Modifier.fillMaxSize().background(color = YELLOW_LIGHT.asColor()))

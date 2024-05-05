@@ -1,30 +1,18 @@
 package screens.dashboardscreen.tabs
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
+import colors.PRIMARY_ORANGE_LIGHT
+import colors.asColor
 
-@Composable
-fun Tab.TabContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-        content = {
-            Text(options.title)
-        }
-    )
-}
-
-//currently selected tab and it's UI
 @Composable
 fun RowScope.TabNavigationItem(tab: Tab) {
     val tabNavigator = LocalTabNavigator.current
@@ -36,8 +24,15 @@ fun RowScope.TabNavigationItem(tab: Tab) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(painter = tab.options.icon!!, contentDescription = tab.options.title)
-                Text(tab.options.title)
+                Icon(
+                    painter = tab.options.icon!!,
+                    tint = if (tabNavigator.current.key == tab.key) PRIMARY_ORANGE_LIGHT.asColor() else Color.LightGray,
+                    contentDescription = tab.options.title
+                )
+                Text(
+                    tab.options.title,
+                    color = if (tabNavigator.current.key == tab.key) PRIMARY_ORANGE_LIGHT.asColor() else Color.LightGray
+                )
             }
         }
     )

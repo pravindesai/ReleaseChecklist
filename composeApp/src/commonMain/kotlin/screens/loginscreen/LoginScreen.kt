@@ -1,6 +1,7 @@
 package screens.loginscreen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,6 +52,7 @@ import repository.CommonRepository
 import screens.dashboardscreen.DashboardScreen
 import strings.UserType
 import ui.AppAlertDialog
+import ui.AppProgressBar
 
 class LoginScreen(val userType: UserType) : Screen {
     @Composable
@@ -75,7 +77,10 @@ class LoginScreen(val userType: UserType) : Screen {
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .wrapContentHeight()
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = colors.YELLOW_TINT.asColor(),
+                )
 
             ) {
                 Column(
@@ -145,6 +150,16 @@ class LoginScreen(val userType: UserType) : Screen {
                         ),
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardActions = KeyboardActions(onDone = {
+
+                            if (id.isBlank()){
+                                showErrorForId = true
+                                return@KeyboardActions
+                            }
+                            if (password.isBlank()){
+                                showErrorForPassword = true
+                                return@KeyboardActions
+                            }
+
                             coroutineScope.launch {
                                 isLoading = true
                                 val isSignInSuccess = async { trySignIn(id, password, userType) }.await()
@@ -216,12 +231,7 @@ class LoginScreen(val userType: UserType) : Screen {
         }
 
         if (isLoading){
-            Box(
-                modifier = Modifier.fillMaxSize().clickable {  },
-                contentAlignment = Alignment.Center
-            ){
-                CircularProgressIndicator()
-            }
+            AppProgressBar()
         }
 
         if (isSignInFailed){
@@ -232,6 +242,7 @@ class LoginScreen(val userType: UserType) : Screen {
                 contentAlignment = Alignment.Center
             ){
                 AppAlertDialog(
+                    modifier = Modifier.wrapContentSize(),
                     showPositiveButton = false,
                     dialogTitle = "Sign In Failed",
                     dialogText = "Please verify your Internet Connectivity and Login Credentials.\nIf issue still persists please contact Admin.",

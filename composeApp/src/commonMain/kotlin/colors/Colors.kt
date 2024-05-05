@@ -9,6 +9,7 @@ val PRIMARY_ORANGE_LIGHT = Triple(252,145,58)
 
 val YELLOW = Triple(249,214,46)
 val YELLOW_LIGHT = Triple(234,227,116)
+val YELLOW_TINT = Triple(255,248,220)
 
 val MAT_DARK = Triple(90,82,85)
 val MAT_WHITE = Triple(249,249,249)
