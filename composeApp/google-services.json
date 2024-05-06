@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "657002136394",
+    "project_id": "releasechecklist-kmm-app",
+    "storage_bucket": "releasechecklist-kmm-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657002136394:android:ff9c77e16aa7b7f39bf7b3",
+        "android_client_info": {
+          "package_name": "app.releasechecklist.code"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClnNYLd5I60vRXUEPqmrklZG--wRjOhSU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

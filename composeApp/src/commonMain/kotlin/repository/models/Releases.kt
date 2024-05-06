@@ -1,5 +1,8 @@
 package repository.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Releases(
     val id:String? = null,
     val adminId: String? = null,

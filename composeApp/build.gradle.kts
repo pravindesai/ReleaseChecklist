@@ -4,8 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
-//    id("app.cash.sqldelight") version "2.0.0-rc02"
-
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 kotlin {
@@ -31,6 +30,14 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.android.driver)
+
+            implementation ("com.google.firebase:firebase-core:21.1.1")
+            implementation ("com.google.firebase:firebase-firestore:25.0.0")
+            implementation ("com.google.firebase:firebase-auth:23.0.0")
+            implementation ("com.google.firebase:firebase-analytics:22.0.0")
+            implementation ("com.google.firebase:firebase-analytics:22.0.0")
+
+//            implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
         }
 
         commonMain.dependencies {
@@ -55,6 +62,30 @@ kotlin {
             implementation("cafe.adriel.voyager:voyager-transitions:1.1.0-alpha04")
             implementation("cafe.adriel.voyager:voyager-koin:1.1.0-alpha04")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+//            implementation("com.google.firebase:firebase-common-ktx:21.0.0")
+
+//            implementation ("co.touchlab:firestore:0.2.5")
+
+//            implementation ("com.google.firebase:firebase-firestore-ktx:25.0.0")
+//            implementation ("com.google.firebase:firebase-auth-ktx:23.0.0")
+//            implementation ("com.google.firebase:firebase-analytics-ktx:22.0.0")
+//            implementation ("com.google.firebase:firebase-analytics-ktx:22.0.0")
+//
+//            implementation("dev.gitlive:firebase-auth:1.12.0")
+//            implementation("dev.gitlive:firebase-database:1.12.0")
+//            implementation("dev.gitlive:firebase-firestore:1.12.0")
+//            implementation("dev.gitlive:firebase-functions:1.12.0")
+//            implementation("dev.gitlive:firebase-messaging:1.12.0")
+//            implementation("dev.gitlive:firebase-storage:1.12.0")
+//            implementation("dev.gitlive:firebase-crashlytics:1.12.0")
+
+            implementation("io.ktor:ktor-client-core:2.3.6")
+            implementation("io.ktor:ktor-client-darwin:2.3.6")
+            implementation("io.ktor:ktor-client-okhttp:2.3.6")
+            implementation("io.ktor:ktor-client-content-negotiation:2.3.6")
+
+
 
 
         }
