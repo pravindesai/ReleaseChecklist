@@ -1,0 +1,408 @@
+{
+	"info": {
+		"_postman_id": "ac0f599e-7904-473e-9755-7827aa6859d0",
+		"name": "ReleaseChecklistFirestore",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33139707"
+	},
+	"item": [
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "getAllAdmins",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/admin?{{firebase-key-param}}",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"admin"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAdminByUserName",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/admin/admin123?{{firebase-key-param}}",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"admin",
+								"admin123"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAdminByUserName",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/admin/admin222?{{firebase-key-param}}",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"admin",
+								"admin222"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addAdminUserNameAndPass",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"fields\": {\r\n            \"adminid\": {\r\n                \"stringValue\": \"admin111\"\r\n            },\r\n            \"adminpass\": {\r\n                \"stringValue\": \"admin111\"\r\n            },\r\n            \"org\": {\r\n                \"stringValue\": \"facebook\"\r\n            }\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{firebase-base-url}}documents/admin?documentId=admin111",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"admin"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "documentId",
+									"value": "admin111"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "project",
+			"item": [
+				{
+					"name": "getAllProjects",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/project",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"project"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addProject",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"fields\": {\r\n            \"projectId\": {\r\n                \"stringValue\": \"TestProject\"\r\n            },\r\n            \"projectName\": {\r\n                \"stringValue\": \"TestProject\"\r\n            },\r\n            \"adminId\": {\r\n                \"stringValue\": \"admin123\"\r\n            }\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{firebase-base-url}}documents/project?documentId={{projectName}}",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"project"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "documentId",
+									"value": "{{projectName}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteProject",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/project/{{projectName}}",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"project",
+								"{{projectName}}"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addReleaseToProject",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"fields\": {\r\n            \"releaseId\": {\r\n                \"stringValue\": \"QA1.1.1\"\r\n            },\r\n            \"projectName\": {\r\n                \"stringValue\": \"TestProject\"\r\n            },\r\n            \"adminId\": {\r\n                \"stringValue\": \"admin123\"\r\n            },\r\n            \"branchName\": {\r\n                \"stringValue\": \"develop\"\r\n            },\r\n            \"tag\": {\r\n                \"stringValue\": \"Qa_release\"\r\n            },\r\n            \"baseCampIDChecked\": {\r\n                \"booleanValue\": true\r\n            },\r\n            \"baseCampLogCheked\": {\r\n                \"booleanValue\": true\r\n            },\r\n            \"releaseDateTimeEpoch\": {\r\n                \"stringValue\": \"18/12/1999:12:11:AM\"\r\n            },\r\n            \"userId\": {\r\n                \"stringValue\": \"pravindesai100\"\r\n            }\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{firebase-base-url}}documents/project/{{projectName}}/releases?documentId=QA1.1.1",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"project",
+								"{{projectName}}",
+								"releases"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "documentId",
+									"value": "QA1.1.1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllReleasesForProject",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/project/{{projectName}}/releases",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"project",
+								"{{projectName}}",
+								"releases"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "getAllUsers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/user?{{firebase-key-param}}",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUser",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{firebase-base-url}}documents/user/pravin",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"user",
+								"pravin"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fields\": {\r\n        \"userid\": {\r\n            \"stringValue\": \"pravindesai100\"\r\n        },\r\n        \"userpass\": {\r\n            \"stringValue\": \"pravindesai100\"\r\n        },\r\n        \"adminId\": {\r\n            \"stringValue\": \"admin123\"\r\n        },\r\n        \"fcmToken\": {\r\n            \"stringValue\": \"fcmtoken212lksdjkfjslkdf23432\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{firebase-base-url}}documents/user?documentId=pravindesai100",
+							"host": [
+								"{{firebase-base-url}}documents"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "{{firebase-key-param}}",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "documentId",
+									"value": "pravindesai100"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "models",
+			"item": [
+				{
+					"name": "New Request",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "data class Admin(\r\n    val id:String? = null,\r\n    val name:String?  = null,\r\n    val fcmToken:String? = null,\r\n    val orgName:String? = null\r\n)\r\n\r\n\r\ndata class Project(\r\n    val id:String? = null,\r\n    val name:String? = null,\r\n    val adminId:String?  = null,\r\n)\r\n\r\ndata class Releases(\r\n    val id:String? = null,\r\n    val adminId: String? = null,\r\n    val version:String?=null,\r\n    val branch:String? = null,\r\n    val releaseDateTimeEpoch:String? = null,\r\n    val user: User? = null,\r\n    val project: Project? = null,\r\n    val tag:String? = null,\r\n    val baseCampIDCheck:Boolean = false,\r\n    val baseCampLogCheck: Boolean = false,\r\n)\r\n\r\n\r\ndata class User(\r\n    val id :String? = null,\r\n    val name:String? = null,\r\n    val type:String? = null,\r\n    val adminId:String? = null,\r\n    val fcmToken:String? = null,\r\n)\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "firebase-base-url",
+			"value": "https://firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/"
+		},
+		{
+			"key": "firebase-key-param",
+			"value": "key=AIzaSyDQhrXoANxRg0SCOOIUt5Zi3y8hrXPefHQ"
+		},
+		{
+			"key": "projectName",
+			"value": "TestProject"
+		}
+	]
+}
