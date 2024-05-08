@@ -31,6 +31,14 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.android.driver)
 //            implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+            implementation("io.ktor:ktor-client-okhttp:2.3.10")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+
+
+        }
+
+        iosMain.dependencies {
+            implementation("io.ktor:ktor-client-darwin:2.3.10")
         }
 
         commonMain.dependencies {
@@ -55,6 +63,16 @@ kotlin {
             implementation("cafe.adriel.voyager:voyager-transitions:1.1.0-alpha04")
             implementation("cafe.adriel.voyager:voyager-koin:1.1.0-alpha04")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+
+            implementation("io.ktor:ktor-client-core:2.3.10")
+            implementation("io.ktor:ktor-client-logging:2.3.10")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.10")
+            implementation("io.ktor:ktor-client-content-negotiation:2.3.10")
+            implementation("io.ktor:ktor-client-encoding:2.3.10")
+            implementation("io.ktor:ktor-client-resources:2.3.10")
+
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 
 
         }
