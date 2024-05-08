@@ -11,16 +11,17 @@ import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import colors.asColor
 import repository.CommonRepository
+import repository.models.data.IntUser
 import screens.dashboardscreen.tabs.HomeTab
 import screens.dashboardscreen.tabs.SettingTab
 import screens.dashboardscreen.tabs.TabNavigationItem
 import strings.UserType
 
-class DashboardScreen(val userType: UserType) :Screen {
+class DashboardScreen(val user: IntUser) :Screen {
 
     @Composable
     override fun Content() {
-        CommonRepository.setCurrentUserType(userType)
+        CommonRepository.setCurrentUser(user)
 
         TabNavigator(
             tab = HomeTab,

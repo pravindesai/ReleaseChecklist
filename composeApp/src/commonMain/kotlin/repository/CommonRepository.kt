@@ -15,20 +15,19 @@ import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLProtocol
 import io.ktor.http.appendPathSegments
-import io.ktor.http.path
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
-import repository.models.ObjAdmin
-import repository.models.Project
-import repository.models.Releases
-import repository.models.User
+import repository.models.data.IntUser
+import repository.models.data.ObjAdmin
+import repository.models.data.ObjUser
 import strings.UserType
 import kotlin.time.Duration.Companion.seconds
 
 object CommonRepository {
     const val BASE_URL = "firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/documents"
-    const val ADMIN_LOGIN = "admin"
+    const val ADMIN = "admin"
+    const val USER = "user"
 
     private val client = HttpClient(){
         install(Resources)
@@ -51,38 +50,59 @@ object CommonRepository {
     }
 
 
-    private var currentUserType:UserType?  = null
+    private var currentUser:IntUser?  = null
 
-    fun getLoggedInUserType() = currentUserType
+    fun getLoggedInUser() = currentUser
 
-    fun setCurrentUserType(userType: UserType?) {
-        currentUserType = userType
+    fun setCurrentUser(user: IntUser?) {
+        currentUser = user
     }
 
-    suspend fun trySignIn(userId:String, userPassword:String, userType: UserType):Boolean{
+    suspend fun trySignIn(userId:String, userPassword:String, userType: UserType):Pair<Boolean, IntUser?>{
         when(userType){
             UserType.ADMIN -> {
                 return try {
                     val httpResponse =  client.get {
                         url {
-                            appendPathSegments(ADMIN_LOGIN, userId)
+                            appendPathSegments(ADMIN, userId)
                         }
                     }
                     logHttpResponse(httpResponse)
                     if (httpResponse.status == HttpStatusCode.OK){
-                        val adminOfMatchingId = httpResponse.body<ObjAdmin>()
-                        adminOfMatchingId.fields?.adminid?.stringValue.equals(userId) and adminOfMatchingId.fields?.adminpass?.stringValue.equals(userPassword)
+                        val adminOfMatchingId = httpResponse.body<ObjAdmin?>()
+                        val isLoggedIn = adminOfMatchingId?.fields?.adminid?.stringValue.equals(userId) and adminOfMatchingId?.fields?.adminpass?.stringValue.equals(userPassword)
+
+                        Pair(isLoggedIn, adminOfMatchingId)
                     }else{
-                        false
+                        Pair(false, null)
                     }
 
                 }catch (e:Exception){
                     println("*** "+e.message)
-                    false
+                    Pair(false, null)
                 }
             }
             UserType.USER -> {
-                return false
+                return try {
+                    val httpResponse =  client.get {
+                        url {
+                            appendPathSegments(USER, userId)
+                        }
+                    }
+                    logHttpResponse(httpResponse)
+                    if (httpResponse.status == HttpStatusCode.OK){
+                        val userOfMatchingId = httpResponse.body<ObjUser?>()
+                        val isLoggedIn =userOfMatchingId?.fields?.userid?.stringValue.equals(userId) and userOfMatchingId?.fields?.userpass?.stringValue.equals(userPassword)
+                        Pair(isLoggedIn, userOfMatchingId)
+
+                    }else{
+                        Pair(false, null)
+                    }
+
+                }catch (e:Exception){
+                    println("*** "+e.message)
+                    Pair(false, null)
+                }
             }
         }
     }
@@ -92,7 +112,7 @@ object CommonRepository {
         return true
     }
 
-    suspend fun addUser(user: User):Boolean{
+    suspend fun addUser(user: Any):Boolean{
         delay(2.seconds)
         return true
     }
@@ -102,15 +122,15 @@ object CommonRepository {
         return true
     }
 
-    suspend fun getAllUsers(user: User):List<User>{
+    suspend fun getAllUsers(user: Any):List<Any>{
         delay(2.seconds)
         return listOf(
-            User("1", "ABCD", "USER", "ory34985", "5384958394"),
-            User("2", "DCBA", "USER", "lksdlskl", "rewoewoiro")
+//            User("1", "ABCD", "USER", "ory34985", "5384958394"),
+//            User("2", "DCBA", "USER", "lksdlskl", "rewoewoiro")
         )
     }
 
-    suspend fun addProject(project: Project):Boolean{
+    suspend fun addProject(project: Any):Boolean{
         delay(2.seconds)
         return true
     }
@@ -120,7 +140,7 @@ object CommonRepository {
         return true
     }
 
-    suspend fun addRelease(releases: Releases):Boolean{
+    suspend fun addRelease(releases: Any):Boolean{
         delay(2.seconds)
         return true
     }

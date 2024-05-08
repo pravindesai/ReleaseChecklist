@@ -49,6 +49,7 @@ import colors.asColor
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import repository.CommonRepository
+import repository.models.data.IntUser
 import screens.dashboardscreen.DashboardScreen
 import strings.UserType
 import ui.AppAlertDialog
@@ -164,8 +165,8 @@ class LoginScreen(val userType: UserType) : Screen {
                                 isLoading = true
                                 val isSignInSuccess = async { trySignIn(id, password, userType) }.await()
                                 isLoading = false
-                                if (isSignInSuccess){
-                                    gotoDashboard(userType, navigator)
+                                if (isSignInSuccess.first){
+                                    gotoDashboard(isSignInSuccess.second, navigator)
                                 }else{
                                     isSignInFailed = true
                                 }
@@ -206,8 +207,8 @@ class LoginScreen(val userType: UserType) : Screen {
                                 isLoading = true
                                 val isSignInSuccess = async { trySignIn(id, password, userType) }.await()
                                 isLoading = false
-                                if (isSignInSuccess){
-                                    gotoDashboard(userType, navigator)
+                                if (isSignInSuccess.first){
+                                    gotoDashboard(isSignInSuccess.second, navigator)
                                 }else{
                                     isSignInFailed = true
                                 }
@@ -257,11 +258,14 @@ class LoginScreen(val userType: UserType) : Screen {
 
     }
 
-    private suspend fun trySignIn(userId:String, userPassword:String, userType: UserType):Boolean{
-        return CommonRepository.trySignIn(userId, userPassword, userType)
+    private suspend fun trySignIn(userId:String, userPassword:String, userType: UserType):Pair<Boolean, IntUser?>{
+        val result = CommonRepository.trySignIn(userId, userPassword, userType)
+        return result
     }
 
-    private fun gotoDashboard(userType: UserType, navigator: Navigator){
-        navigator.push(DashboardScreen(userType = userType))
+    private fun gotoDashboard(user: IntUser?, navigator: Navigator){
+        user?.let {
+            navigator.push(DashboardScreen(user = it))
+        }
     }
 }
