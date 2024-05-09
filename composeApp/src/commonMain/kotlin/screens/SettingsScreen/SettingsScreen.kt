@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import colors.MAT_DARK
 import colors.asColor
 import kotlinx.coroutines.launch
 import repository.CommonRepository
+import repository.models.data.ObjAdmin
 import screens.dashboardscreen.DashboardScreen
 import screens.mainscreen.UserSelectionScreen
 import ui.AppProgressBar
@@ -45,6 +47,12 @@ class SettingsScreen : Screen {
         val coroutineScope = rememberCoroutineScope()
         val tabNavigator = LocalNavigator.currentOrThrow
         var isLoading by remember { mutableStateOf(false) }
+        val currentUser by remember { mutableStateOf(CommonRepository.getLoggedInUser()) }
+        val isAdmin by remember {
+            derivedStateOf {
+                currentUser is ObjAdmin
+            }
+        }
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -58,7 +66,6 @@ class SettingsScreen : Screen {
                         isLoading = true
                         val isSignedOut = signOut()
                         if (isSignedOut){
-                            CommonRepository.setCurrentUser(null)
                             tabNavigator.parent?.replaceAll(UserSelectionScreen())
                         }
                         isLoading = false

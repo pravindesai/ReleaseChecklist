@@ -21,7 +21,6 @@ class DashboardScreen(val user: IntUser) :Screen {
 
     @Composable
     override fun Content() {
-        CommonRepository.setCurrentUser(user)
 
         TabNavigator(
             tab = HomeTab,

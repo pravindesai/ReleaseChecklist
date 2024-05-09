@@ -10,24 +10,43 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLProtocol
 import io.ktor.http.appendPathSegments
+import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
+import repository.models.ApiResult
+import repository.models.Field
+import repository.models.FieldFilter
+import repository.models.FromItem
+import repository.models.Query
+import repository.models.StructuredQuery
+import repository.models.Value
+import repository.models.Where
 import repository.models.data.IntUser
 import repository.models.data.ObjAdmin
+import repository.models.data.ObjListOfUsers
+import repository.models.data.ObjListOfUsersItem
 import repository.models.data.ObjUser
 import strings.UserType
 import kotlin.time.Duration.Companion.seconds
 
 object CommonRepository {
+    private var currentUser:IntUser?  = null
+
     const val BASE_URL = "firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/documents"
+    const val HTTPS_BASE_URL = "https://$BASE_URL"
     const val ADMIN = "admin"
     const val USER = "user"
+
+    const val QUERYPATH = ":runQuery"
 
     private val client = HttpClient(){
         install(Resources)
@@ -49,8 +68,16 @@ object CommonRepository {
         }
     }
 
+    private val clientWithoutDefaults = HttpClient(){
+        install(Resources)
+        install(ContentNegotiation){
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+            })
+        }
+    }
 
-    private var currentUser:IntUser?  = null
 
     fun getLoggedInUser() = currentUser
 
@@ -71,13 +98,15 @@ object CommonRepository {
                     if (httpResponse.status == HttpStatusCode.OK){
                         val adminOfMatchingId = httpResponse.body<ObjAdmin?>()
                         val isLoggedIn = adminOfMatchingId?.fields?.adminid?.stringValue.equals(userId) and adminOfMatchingId?.fields?.adminpass?.stringValue.equals(userPassword)
-
+                        setCurrentUser(adminOfMatchingId.takeIf { isLoggedIn })
                         Pair(isLoggedIn, adminOfMatchingId)
                     }else{
+                        setCurrentUser(null)
                         Pair(false, null)
                     }
 
                 }catch (e:Exception){
+                    setCurrentUser(null)
                     println("*** "+e.message)
                     Pair(false, null)
                 }
@@ -93,13 +122,16 @@ object CommonRepository {
                     if (httpResponse.status == HttpStatusCode.OK){
                         val userOfMatchingId = httpResponse.body<ObjUser?>()
                         val isLoggedIn =userOfMatchingId?.fields?.userid?.stringValue.equals(userId) and userOfMatchingId?.fields?.userpass?.stringValue.equals(userPassword)
+                        setCurrentUser(userOfMatchingId.takeIf { isLoggedIn })
                         Pair(isLoggedIn, userOfMatchingId)
 
                     }else{
+                        setCurrentUser(null)
                         Pair(false, null)
                     }
 
                 }catch (e:Exception){
+                    setCurrentUser(null)
                     println("*** "+e.message)
                     Pair(false, null)
                 }
@@ -109,6 +141,7 @@ object CommonRepository {
 
     suspend fun signOut():Boolean{
         delay(2.seconds)
+        setCurrentUser(null)
         return true
     }
 
@@ -122,12 +155,54 @@ object CommonRepository {
         return true
     }
 
-    suspend fun getAllUsers(user: Any):List<Any>{
-        delay(2.seconds)
-        return listOf(
-//            User("1", "ABCD", "USER", "ory34985", "5384958394"),
-//            User("2", "DCBA", "USER", "lksdlskl", "rewoewoiro")
-        )
+    suspend fun getAllUsersForAdmin(adminId:String): ApiResult<List<ObjUser>>?{
+
+        return try {
+
+            val httpResponse =  clientWithoutDefaults.post(HTTPS_BASE_URL.plus(QUERYPATH)) {
+                contentType(ContentType.Application.Json)
+                setBody(Query(
+                    structuredQuery = StructuredQuery(
+                        from = listOf(FromItem(collectionId = USER)),
+                        where = Where(
+                            fieldFilter = FieldFilter(
+                                field = Field(
+                                    fieldPath = "adminId"
+                                ),
+                                op = "EQUAL",
+                                value = Value(
+                                    stringValue = adminId
+                                )
+                            )
+                        )
+                    )
+                ))
+            }
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val listOfUsers = httpResponse.body<List<ObjListOfUsersItem?>?>()
+                ApiResult(
+                    success = true,
+                    data = listOfUsers?.map { it?.document }?.filterNotNull(),
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = emptyList(),
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = emptyList(),
+                message = e.message
+            )
+        }
     }
 
     suspend fun addProject(project: Any):Boolean{
@@ -154,6 +229,7 @@ object CommonRepository {
         println("***********ResponseStart***********")
         println("URL : "+httpResponse.request.url)
         println("Method : "+httpResponse.request.method)
+        println("Content : "+httpResponse.request.content)
         println("Status : "+httpResponse.status)
         println("ResponseTime : "+httpResponse.responseTime)
         println("Body : \n"+httpResponse.body<String>())

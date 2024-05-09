@@ -4,10 +4,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class StructuredQuery(
-
+data class Query(
 	@SerialName("structuredQuery")
 	val structuredQuery: StructuredQuery? = null,
+)
+
+@Serializable
+data class StructuredQuery(
 
 	@SerialName("select")
 	val select: Select? = null,
