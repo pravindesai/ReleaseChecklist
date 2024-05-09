@@ -64,7 +64,7 @@ fun CustomViewTypeSelectionTab(
                     )
 
                     AnimatedVisibility(selectedType == AdminListViewType.Users){
-                        Divider(modifier = Modifier.padding(start = 10.dp, end = 10.dp), color = PRIMARY_ORANGE.asColor(), thickness = 1.dp)
+                        Divider(modifier = Modifier.padding(top = 5.dp, start = 10.dp, end = 10.dp), color = PRIMARY_ORANGE.asColor(), thickness = 1.dp)
                     }
                 }
 
@@ -82,7 +82,7 @@ fun CustomViewTypeSelectionTab(
                         }
                     )
                     AnimatedVisibility(selectedType == AdminListViewType.Projects){
-                        Divider(modifier = Modifier.padding(start = 10.dp, end = 10.dp), color = PRIMARY_ORANGE.asColor(), thickness = 1.dp)
+                        Divider(modifier = Modifier.padding(top = 5.dp, start = 10.dp, end = 10.dp), color = PRIMARY_ORANGE.asColor(), thickness = 1.dp)
                     }
 
                 }
@@ -101,7 +101,7 @@ fun CustomViewTypeSelectionTab(
                         }
                     )
                     AnimatedVisibility(selectedType == AdminListViewType.Releases){
-                        Divider(modifier = Modifier.padding(start = 10.dp, end = 10.dp), color = PRIMARY_ORANGE.asColor(), thickness = 1.dp)
+                        Divider(modifier = Modifier.padding(top = 5.dp, start = 10.dp, end = 10.dp), color = PRIMARY_ORANGE.asColor(), thickness = 1.dp)
                     }
                 }
             }
