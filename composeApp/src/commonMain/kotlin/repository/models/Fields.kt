@@ -25,6 +25,34 @@ data class Fields(
     val userid: StringValue? = null,
 
     @SerialName("fcmToken")
-    val fcmToken: StringValue? = null
+    val fcmToken: StringValue? = null,
+
+    @SerialName("projectName")
+    val projectName: StringValue? = null,
+
+    @SerialName("projectId")
+    val projectId: StringValue? = null,
+
+    @SerialName("baseCampLogCheked")
+    val baseCampLogCheked: BooleanValue? = null,
+
+    @SerialName("releaseId")
+    val releaseId: StringValue? = null,
+
+    @SerialName("branchName")
+    val branchName: StringValue? = null,
+
+    @SerialName("tag")
+    val tag: StringValue? = null,
+
+    @SerialName("userId")
+    val userId: StringValue? = null,
+
+    @SerialName("baseCampIDChecked")
+    val baseCampIDChecked: BooleanValue? = null,
+
+    @SerialName("releaseDateTimeEpoch")
+    val releaseDateTimeEpoch: StringValue? = null
+
 
 )
