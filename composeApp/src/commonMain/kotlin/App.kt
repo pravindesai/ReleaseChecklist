@@ -30,15 +30,15 @@ fun App() {
                     else -> true
                 }
 
-            }) { navigator ->
-            SlideTransition(
-                navigator = navigator,
-                animationSpec = spring(
-                    stiffness = Spring.StiffnessLow,
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    visibilityThreshold = IntOffset.VisibilityThreshold
+            }, content = { navigator ->
+                SlideTransition(
+                    navigator = navigator,
+                    animationSpec = spring(
+                        stiffness = Spring.StiffnessLow,
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        visibilityThreshold = IntOffset.VisibilityThreshold
+                    )
                 )
-            )
-        }
+            })
     }
 }
