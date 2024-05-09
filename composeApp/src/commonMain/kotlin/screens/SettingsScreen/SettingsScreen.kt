@@ -58,7 +58,7 @@ class SettingsScreen : Screen {
                         isLoading = true
                         val isSignedOut = signOut()
                         if (isSignedOut){
-                            CommonRepository.setCurrentUserType(null)
+                            CommonRepository.setCurrentUser(null)
                             tabNavigator.parent?.replaceAll(UserSelectionScreen())
                         }
                         isLoading = false
