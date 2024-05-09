@@ -9,6 +9,9 @@ data class Fields(
     @SerialName("org")
     val org: StringValue? = null,
 
+    @SerialName("addedBy")
+    val addedBy: StringValue? = null,
+
     @SerialName("adminid")
     val adminid: StringValue? = null,
 
@@ -50,6 +53,9 @@ data class Fields(
 
     @SerialName("baseCampIDChecked")
     val baseCampIDChecked: BooleanValue? = null,
+
+    @SerialName("specialRights")
+    val specialRights: BooleanValue? = null,
 
     @SerialName("releaseDateTimeEpoch")
     val releaseDateTimeEpoch: StringValue? = null

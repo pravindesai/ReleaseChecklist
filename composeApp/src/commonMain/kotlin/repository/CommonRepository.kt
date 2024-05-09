@@ -19,20 +19,25 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLProtocol
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import repository.models.ApiResult
 import repository.models.Field
 import repository.models.FieldFilter
+import repository.models.Fields
 import repository.models.FromItem
 import repository.models.Query
+import repository.models.StringValue
 import repository.models.StructuredQuery
 import repository.models.Value
 import repository.models.Where
+import repository.models.data.AddAdminPayload
 import repository.models.data.IntUser
 import repository.models.data.ObjAdmin
-import repository.models.data.ObjListOfUsers
+import repository.models.data.ObjDocument
+import repository.models.data.ObjListOfProjectItem
 import repository.models.data.ObjListOfUsersItem
 import repository.models.data.ObjUser
 import strings.UserType
@@ -45,8 +50,13 @@ object CommonRepository {
     const val HTTPS_BASE_URL = "https://$BASE_URL"
     const val ADMIN = "admin"
     const val USER = "user"
+    const val PROJECT = "project"
 
     const val QUERYPATH = ":runQuery"
+
+    fun getCurrentAdminId():String?{
+        return (currentUser as? ObjAdmin)?.fields?.adminId?.stringValue ?: (currentUser as? ObjAdmin)?.fields?.adminid?.stringValue
+    }
 
     private val client = HttpClient(){
         install(Resources)
@@ -145,9 +155,47 @@ object CommonRepository {
         return true
     }
 
-    suspend fun addUser(user: Any):Boolean{
-        delay(2.seconds)
-        return true
+    suspend fun addUser(userId: String, userPass: String):ApiResult<ObjUser>{
+        return try {
+
+            val httpResponse =  client.post(USER) {
+                contentType(ContentType.Application.Json)
+                url{
+                    parameters.append("documentId", userId)
+                }
+                setBody(AddAdminPayload(
+                    fields = Fields(
+                        userId = StringValue(stringValue = userId),
+                        userpass = StringValue(stringValue = userPass),
+                        adminId = StringValue(stringValue = getCurrentAdminId()),
+                    )
+                ))
+            }
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val user = httpResponse.body<ObjUser?>()
+                ApiResult(
+                    success = true,
+                    data = user,
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = null,
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = null,
+                message = e.message
+            )
+        }
     }
 
     suspend fun removeUser(userId:String):Boolean{
@@ -181,7 +229,57 @@ object CommonRepository {
             logHttpResponse(httpResponse)
 
             if (httpResponse.status == HttpStatusCode.OK){
-                val listOfUsers = httpResponse.body<List<ObjListOfUsersItem?>?>()
+                val listOfUsers = httpResponse.body<List<ObjListOfUsersItem>>()
+                ApiResult(
+                    success = true,
+                    data = listOfUsers.map { it.document }.filterNotNull(),
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = emptyList(),
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = emptyList(),
+                message = e.message
+            )
+        }
+    }
+
+    suspend fun getAllProjectForAdmin(adminId:String): ApiResult<List<ObjDocument>>?{
+
+        return try {
+
+            val httpResponse =  clientWithoutDefaults.post(HTTPS_BASE_URL.plus(QUERYPATH)) {
+                contentType(ContentType.Application.Json)
+                setBody(Query(
+                    structuredQuery = StructuredQuery(
+                        from = listOf(FromItem(collectionId = PROJECT)),
+                        where = Where(
+                            fieldFilter = FieldFilter(
+                                field = Field(
+                                    fieldPath = "adminId"
+                                ),
+                                op = "EQUAL",
+                                value = Value(
+                                    stringValue = adminId
+                                )
+                            )
+                        )
+                    )
+                ))
+            }
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val listOfUsers = httpResponse.body<List<ObjListOfProjectItem?>?>()
                 ApiResult(
                     success = true,
                     data = listOfUsers?.map { it?.document }?.filterNotNull(),
@@ -205,10 +303,96 @@ object CommonRepository {
         }
     }
 
-    suspend fun addProject(project: Any):Boolean{
-        delay(2.seconds)
-        return true
+
+    suspend fun addProject(projectName: String):ApiResult<ObjDocument>{
+        return try {
+
+            val httpResponse =  client.post(PROJECT) {
+                contentType(ContentType.Application.Json)
+                url{
+                    parameters.append("documentId", projectName)
+                }
+                setBody(AddAdminPayload(
+                    fields = Fields(
+                        projectId = StringValue(stringValue = projectName),
+                        projectName = StringValue(stringValue = projectName),
+                        adminId = StringValue(stringValue = getCurrentAdminId()),
+                    )
+                ))
+            }
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val user = httpResponse.body<ObjDocument?>()
+                ApiResult(
+                    success = true,
+                    data = user,
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = null,
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = null,
+                message = e.message
+            )
+        }
+
     }
+
+    suspend fun addAdmin(adminId: String, adminPass:String, org:String?):ApiResult<ObjDocument>{
+        return try {
+
+            val httpResponse =  client.post(ADMIN) {
+                contentType(ContentType.Application.Json)
+                url{
+                    parameters.append("documentId", adminId)
+                }
+                setBody(AddAdminPayload(
+                    fields = Fields(
+                        adminId = StringValue(stringValue = adminId),
+                        adminpass = StringValue(stringValue = adminPass),
+                        org = StringValue(stringValue = org),
+                        addedBy = StringValue(getCurrentAdminId())
+                    )
+                ))
+            }
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val user = httpResponse.body<ObjDocument?>()
+                ApiResult(
+                    success = true,
+                    data = user,
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = null,
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = null,
+                message = e.message
+            )
+        }
+
+    }
+
 
     suspend fun removeProject(projectId:String):Boolean{
         delay(2.seconds)

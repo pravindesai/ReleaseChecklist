@@ -60,8 +60,8 @@ class LoginScreen(val userType: UserType) : Screen {
     override fun Content() {
         val coroutineScope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
-        var id by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
+        var id by remember { mutableStateOf("admin123") }
+        var password by remember { mutableStateOf("admin123") }
         var isLoading by remember { mutableStateOf(false) }
         var isSignInFailed by remember { mutableStateOf(false) }
 
