@@ -9,6 +9,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.resources.Resources
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -23,6 +24,7 @@ import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
+import repository.CommonRepository.PROJECT
 import repository.models.ApiResult
 import repository.models.Field
 import repository.models.FieldFilter
@@ -51,6 +53,7 @@ object CommonRepository {
     const val ADMIN = "admin"
     const val USER = "user"
     const val PROJECT = "project"
+    const val RELEASE = "release"
 
     const val QUERYPATH = ":runQuery"
 
@@ -419,4 +422,104 @@ object CommonRepository {
         println("Body : \n"+httpResponse.body<String>())
         println("***********ResponseEnd*************")
     }
+
+    suspend fun deleteUser(user: ObjUser): ApiResult<ObjUser> {
+
+        return try {
+
+            val httpResponse =  client.delete(USER.plus("/").plus(user.fields?.userId?.stringValue))
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val objUser = httpResponse.body<ObjUser>()
+                ApiResult(
+                    success = true,
+                    data = objUser,
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = null,
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = null,
+                message = e.message
+            )
+        }
+    }
+
+    suspend fun deleteProject(user: ObjDocument): ApiResult<ObjDocument> {
+
+        return try {
+
+            val httpResponse =  client.delete(PROJECT.plus("/").plus(user.fields?.projectId?.stringValue))
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val objUser = httpResponse.body<ObjDocument>()
+                ApiResult(
+                    success = true,
+                    data = objUser,
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = null,
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = null,
+                message = e.message
+            )
+        }
+    }
+
+    suspend fun deleteRelease(user: ObjDocument): ApiResult<ObjDocument> {
+
+        return try {
+
+            val httpResponse =  client.delete(RELEASE.plus(user.fields?.projectId))
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val objUser = httpResponse.body<ObjDocument>()
+                ApiResult(
+                    success = true,
+                    data = objUser,
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = null,
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = null,
+                message = e.message
+            )
+        }
+    }
+
+
 }
+
+

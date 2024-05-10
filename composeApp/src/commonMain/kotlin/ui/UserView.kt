@@ -1,15 +1,25 @@
 package ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -22,31 +32,37 @@ import repository.models.data.ObjUser
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UserView(objUser: ObjUser, onUserSelected: (ObjUser) -> Unit = {}) {
+fun UserView(
+    objUser: ObjUser, onUserSelected: (ObjUser) -> Unit = {}, onUserDelete: (ObjUser) -> Unit = {}
+) {
     Card(modifier = Modifier.fillMaxWidth().wrapContentHeight(),
         shape = RoundedCornerShape(5.dp),
         elevation = 2.dp,
         onClick = {
             onUserSelected(objUser)
-        }
-    ) {
-        Column(
+        }) {
+        Row(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(
-                start = 10.dp,
-                end = 10.dp,
-                top = 10.dp,
-                bottom = 10.dp
+                start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp
             )
         ) {
             Text(
+                modifier = Modifier.weight(1f),
                 text = (objUser.fields?.userid?.stringValue)
                     ?: (objUser.fields?.userId?.stringValue) ?: "",
                 color = MAT_DARK.asColor(),
                 style = TextStyle(
-                    fontSize = 18.sp,
-                    fontStyle = FontStyle.Normal,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 18.sp, fontStyle = FontStyle.Normal, fontWeight = FontWeight.Medium
                 )
+            )
+
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "",
+                tint = Color.LightGray,
+                modifier = Modifier.height(24.dp).width(24.dp).clickable {
+                    onUserDelete(objUser)
+                }
             )
         }
     }
@@ -55,31 +71,39 @@ fun UserView(objUser: ObjUser, onUserSelected: (ObjUser) -> Unit = {}) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DocumentView(objDocument: ObjDocument, onUserSelected: (ObjDocument) -> Unit = {}) {
+fun DocumentView(
+    objDocument: ObjDocument,
+    onDocumentSelected: (ObjDocument) -> Unit = {},
+    onDocumentDelete: (ObjDocument) -> Unit = {}
+) {
     Card(modifier = Modifier.fillMaxWidth().wrapContentHeight(),
         shape = RoundedCornerShape(5.dp),
         elevation = 2.dp,
         onClick = {
-            onUserSelected(objDocument)
-        }
-    ) {
-        Column(
+            onDocumentSelected(objDocument)
+        }) {
+        Row(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(
-                start = 10.dp,
-                end = 10.dp,
-                top = 10.dp,
-                bottom = 10.dp
+                start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp
             )
         ) {
             Text(
+                modifier = Modifier.weight(1f),
                 text = (objDocument.fields?.projectName?.stringValue)
                     ?: (objDocument.fields?.projectId?.stringValue) ?: "",
                 color = MAT_DARK.asColor(),
                 style = TextStyle(
-                    fontSize = 18.sp,
-                    fontStyle = FontStyle.Normal,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 18.sp, fontStyle = FontStyle.Normal, fontWeight = FontWeight.Medium
                 )
+            )
+
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "",
+                tint = Color.LightGray,
+                modifier = Modifier.height(24.dp).width(24.dp).clickable {
+                    onDocumentDelete(objDocument)
+                }
             )
         }
     }

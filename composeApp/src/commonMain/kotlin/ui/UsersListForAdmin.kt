@@ -15,7 +15,12 @@ import repository.models.data.ObjDocument
 import repository.models.data.ObjUser
 
 @Composable
-fun UsersListForAdmin(modifier: Modifier = Modifier, usersList: List<ObjUser>) {
+fun UsersListForAdmin(
+    modifier: Modifier = Modifier,
+    usersList: List<ObjUser>,
+    onUserSelected: (ObjUser) -> Unit = {},
+    onUserDelete: (ObjUser) -> Unit = {}
+) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(5.dp),
@@ -24,7 +29,9 @@ fun UsersListForAdmin(modifier: Modifier = Modifier, usersList: List<ObjUser>) {
         items(usersList) {
             Column {
                 UserView(it, onUserSelected = { user: ObjUser ->
-
+                    onUserSelected(user)
+                }, onUserDelete = { user: ObjUser ->
+                    onUserDelete(user)
                 })
                 Spacer(modifier = Modifier.height(3.dp))
             }
@@ -33,7 +40,11 @@ fun UsersListForAdmin(modifier: Modifier = Modifier, usersList: List<ObjUser>) {
 }
 
 @Composable
-fun ProjectListForAdmin(modifier: Modifier = Modifier, usersList: List<ObjDocument>) {
+fun ProjectListForAdmin(
+    modifier: Modifier = Modifier, usersList: List<ObjDocument>,
+    onDocumentSelected: (ObjDocument) -> Unit = {},
+    onDocumentDelete: (ObjDocument) -> Unit = {}
+) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(5.dp),
@@ -41,8 +52,10 @@ fun ProjectListForAdmin(modifier: Modifier = Modifier, usersList: List<ObjDocume
     ) {
         items(usersList) {
             Column {
-                DocumentView(it, onUserSelected = { document: ObjDocument ->
-
+                DocumentView(it, onDocumentSelected = { document: ObjDocument ->
+                    onDocumentSelected(document)
+                }, onDocumentDelete = { document: ObjDocument ->
+                    onDocumentDelete(document)
                 })
                 Spacer(modifier = Modifier.height(3.dp))
             }
