@@ -19,10 +19,6 @@ fun App() {
     MaterialTheme {
         Navigator(
             screen = SplashScreen(),
-            disposeBehavior = NavigatorDisposeBehavior(
-                disposeNestedNavigators = true,
-                disposeSteps = false
-            ),
             onBackPressed = { currentScreen ->
                 when (currentScreen) {
                     is UserSelectionScreen -> false

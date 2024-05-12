@@ -2,6 +2,7 @@ package repository.models.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import repository.models.Fields
 
 
@@ -18,6 +19,9 @@ data class ObjDocument(
     val updateTime: String? = null,
 
     @SerialName("fields")
-    val fields: Fields? = null
+    val fields: Fields? = null,
+
+    @Transient
+    var isExpanded: Boolean = true
 )
 

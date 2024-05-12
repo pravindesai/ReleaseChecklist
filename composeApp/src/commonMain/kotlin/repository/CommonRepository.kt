@@ -20,11 +20,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLProtocol
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
-import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
-import repository.CommonRepository.PROJECT
 import repository.models.ApiResult
 import repository.models.Field
 import repository.models.FieldFilter
@@ -40,9 +38,11 @@ import repository.models.data.IntUser
 import repository.models.data.ObjAdmin
 import repository.models.data.ObjDocument
 import repository.models.data.ObjListOfProjectItem
+import repository.models.data.ObjListOfReleases
 import repository.models.data.ObjListOfUsersItem
 import repository.models.data.ObjUser
 import strings.UserType
+import strings.encrypt
 import kotlin.time.Duration.Companion.seconds
 
 object CommonRepository {
@@ -53,7 +53,7 @@ object CommonRepository {
     const val ADMIN = "admin"
     const val USER = "user"
     const val PROJECT = "project"
-    const val RELEASE = "release"
+    const val RELEASES = "releases"
 
     const val QUERYPATH = ":runQuery"
 
@@ -110,7 +110,7 @@ object CommonRepository {
                     logHttpResponse(httpResponse)
                     if (httpResponse.status == HttpStatusCode.OK){
                         val adminOfMatchingId = httpResponse.body<ObjAdmin?>()
-                        val isLoggedIn = adminOfMatchingId?.fields?.adminid?.stringValue.equals(userId) and adminOfMatchingId?.fields?.adminpass?.stringValue.equals(userPassword)
+                        val isLoggedIn = adminOfMatchingId?.fields?.adminid?.stringValue.equals(userId) and adminOfMatchingId?.fields?.adminpass?.stringValue.equals(userPassword?.encrypt())
                         setCurrentUser(adminOfMatchingId.takeIf { isLoggedIn })
                         Pair(isLoggedIn, adminOfMatchingId)
                     }else{
@@ -134,7 +134,7 @@ object CommonRepository {
                     logHttpResponse(httpResponse)
                     if (httpResponse.status == HttpStatusCode.OK){
                         val userOfMatchingId = httpResponse.body<ObjUser?>()
-                        val isLoggedIn =userOfMatchingId?.fields?.userid?.stringValue.equals(userId) and userOfMatchingId?.fields?.userpass?.stringValue.equals(userPassword)
+                        val isLoggedIn =userOfMatchingId?.fields?.userid?.stringValue.equals(userId) and userOfMatchingId?.fields?.userpass?.stringValue.equals(userPassword.encrypt())
                         setCurrentUser(userOfMatchingId.takeIf { isLoggedIn })
                         Pair(isLoggedIn, userOfMatchingId)
 
@@ -169,7 +169,7 @@ object CommonRepository {
                 setBody(AddAdminPayload(
                     fields = Fields(
                         userId = StringValue(stringValue = userId),
-                        userpass = StringValue(stringValue = userPass),
+                        userpass = StringValue(stringValue = userPass.encrypt()),
                         adminId = StringValue(stringValue = getCurrentAdminId()),
                     )
                 ))
@@ -362,7 +362,7 @@ object CommonRepository {
                 setBody(AddAdminPayload(
                     fields = Fields(
                         adminId = StringValue(stringValue = adminId),
-                        adminpass = StringValue(stringValue = adminPass),
+                        adminpass = StringValue(stringValue = adminPass.encrypt()),
                         org = StringValue(stringValue = org),
                         addedBy = StringValue(getCurrentAdminId())
                     )
@@ -491,7 +491,7 @@ object CommonRepository {
 
         return try {
 
-            val httpResponse =  client.delete(RELEASE.plus(user.fields?.projectId))
+            val httpResponse =  client.delete(RELEASES.plus(user.fields?.projectId))
             logHttpResponse(httpResponse)
 
             if (httpResponse.status == HttpStatusCode.OK){
@@ -514,6 +514,42 @@ object CommonRepository {
             ApiResult(
                 success = false,
                 data = null,
+                message = e.message
+            )
+        }
+    }
+
+    suspend fun getAllReleasesForProject(objDocument: ObjDocument): ApiResult<List<ObjDocument>>{
+
+        return try {
+
+            val httpResponse =  client.get {
+                url {
+                    appendPathSegments(PROJECT, objDocument.fields?.projectId?.stringValue?:"", RELEASES )
+                }
+            }
+            logHttpResponse(httpResponse)
+
+            if (httpResponse.status == HttpStatusCode.OK){
+                val listOfUsers = httpResponse.body<ObjListOfReleases>()
+                ApiResult(
+                    success = true,
+                    data = listOfUsers.documents?.filterNotNull(),
+                    message = httpResponse.body<String>()
+                )
+            }else{
+                ApiResult(
+                    success = false,
+                    data = emptyList(),
+                    message = httpResponse.body<String>()
+                )
+            }
+
+        }catch (e:Exception){
+            println("*** "+e.message)
+            ApiResult(
+                success = false,
+                data = emptyList(),
                 message = e.message
             )
         }

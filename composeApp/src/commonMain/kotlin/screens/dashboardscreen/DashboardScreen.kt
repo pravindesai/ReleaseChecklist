@@ -23,7 +23,6 @@ class DashboardScreen(val user: IntUser) :Screen {
 
         TabNavigator(
             tab = HomeTab,
-            disposeNestedNavigators = true,
             content = { tabNavigator ->
                 Scaffold(
                     modifier = Modifier.animateContentSize(),

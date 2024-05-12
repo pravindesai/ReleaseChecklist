@@ -12,6 +12,9 @@ val YELLOW_LIGHT = Triple(234,227,116)
 val YELLOW_TINT = Triple(255,248,220)
 
 val MAT_DARK = Triple(90,82,85)
+val MAT_DARK_LIGHT = Triple(142, 142, 142 )
 val MAT_WHITE = Triple(249,249,249)
+val GREEN = Triple(147,	197,	33)
+val RED = Triple(	216,	63,	63)
 
 fun Triple<Int, Int, Int>.asColor() = Color(this.first, this.second, this.third)

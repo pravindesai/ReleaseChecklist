@@ -26,10 +26,13 @@ import repository.models.ApiResult
 import repository.models.data.ObjAdmin
 import repository.models.data.ObjDocument
 import repository.models.data.ObjUser
+import screens.releaseListScreen.ReleaseListScreen
 
 enum class AdminListViewType {
     Users, Projects, Releases
 }
+
+var selectedViewTypeGlobal = AdminListViewType.Users
 
 @Composable
 fun AdminHomeScreen(admin: ObjAdmin?) {
@@ -40,7 +43,7 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
     var dialogMessage by remember { mutableStateOf("") }
     val adminState by remember { mutableStateOf(admin) }
 
-    var selectedListViewType by remember { mutableStateOf(AdminListViewType.Users) }
+    var selectedListViewType by remember { mutableStateOf(selectedViewTypeGlobal) }
     var usersList by remember { mutableStateOf(emptyList<ObjUser>()) }
     var projectList by remember { mutableStateOf(emptyList<ObjDocument>()) }
     var releasesList by remember { mutableStateOf(emptyList<ObjDocument>()) }
@@ -126,27 +129,44 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
 
     Column {
         //UI
-        CustomViewTypeSelectionTab(selectedType = selectedListViewType, onViewTypeChanged = {
-            selectedListViewType = it
+        CustomViewTypeSelectionTab(selectedType = selectedListViewType,
+            onViewTypeChanged = {
+                selectedViewTypeGlobal = it
+                selectedListViewType = it
         })
 
         when (selectedListViewType) {
             AdminListViewType.Users -> UsersListForAdmin(
                 modifier = Modifier.fillMaxWidth().weight(1f).animateContentSize(),
                 usersList = usersList,
-                onUserSelected = {},
+                onUserSelected = {
+                    tabNavigator.parent?.push(ReleaseListScreen(
+                        viewType = AdminListViewType.Users,
+                        objUser = it
+                    ))
+                },
                 onUserDelete = { deleteUser = Pair(true, it) })
 
             AdminListViewType.Projects -> ProjectListForAdmin(
                 modifier = Modifier.fillMaxWidth().weight(1f).animateContentSize(),
                 usersList = projectList,
-                onDocumentSelected = {},
+                onDocumentSelected = {
+                    tabNavigator.parent?.push(ReleaseListScreen(
+                        viewType = AdminListViewType.Projects,
+                        objDocument = it
+                    ))
+                },
                 onDocumentDelete = { deleteProject = Pair(true, it) })
 
             AdminListViewType.Releases -> ProjectListForAdmin(
                 modifier = Modifier.fillMaxWidth().weight(1f).animateContentSize(),
                 usersList = releasesList,
-                onDocumentSelected = {},
+                onDocumentSelected = {
+                    tabNavigator.parent?.push(ReleaseListScreen(
+                        viewType = AdminListViewType.Releases,
+                        objDocument = it
+                    ))
+                },
                 onDocumentDelete = { deleteRelease = Pair(true, it) })
         }
 
@@ -207,17 +227,17 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
                                 isLoading = true
                                 val result = deleteUser.second?.let { deleteUser(it) }
 
-                                if (result?.success==true){
+                                if (result?.success == true) {
                                     usersList = usersList.filterNot { it == deleteUser.second }
                                     dialogMessage = "User deleted successfully."
                                     showDialog = true
-                                }else{
-                                    dialogMessage = result?.message?:"FAILED"
+                                } else {
+                                    dialogMessage = result?.message ?: "FAILED"
                                 }
 
                                 showDialog = true
                                 deleteUser = Pair(false, null)
-                                isLoading  = false
+                                isLoading = false
                             }
 
                         }
@@ -229,17 +249,18 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
                                 isLoading = true
                                 val result = deleteProject.second?.let { deleteProject(it) }
 
-                                if (result?.success==true){
-                                    projectList = projectList.filterNot { it == deleteProject.second }
+                                if (result?.success == true) {
+                                    projectList =
+                                        projectList.filterNot { it == deleteProject.second }
                                     dialogMessage = "Project deleted successfully."
                                     showDialog = true
-                                }else{
-                                    dialogMessage = result?.message?:"FAILED"
+                                } else {
+                                    dialogMessage = result?.message ?: "FAILED"
                                 }
 
                                 showDialog = true
                                 deleteUser = Pair(false, null)
-                                isLoading  = false
+                                isLoading = false
                             }
                         }
 
@@ -250,17 +271,18 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
                                 isLoading = true
                                 val result = deleteRelease.second?.let { deleteRelease(it) }
 
-                                if (result?.success==true){
-                                    releasesList = releasesList.filterNot { it == deleteRelease.second }
+                                if (result?.success == true) {
+                                    releasesList =
+                                        releasesList.filterNot { it == deleteRelease.second }
                                     dialogMessage = "Project deleted successfully."
                                     showDialog = true
-                                }else{
-                                    dialogMessage = result?.message?:"FAILED"
+                                } else {
+                                    dialogMessage = result?.message ?: "FAILED"
                                 }
 
                                 showDialog = true
                                 deleteUser = Pair(false, null)
-                                isLoading  = false
+                                isLoading = false
                             }
 
                         }
