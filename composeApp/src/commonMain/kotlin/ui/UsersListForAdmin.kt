@@ -33,7 +33,7 @@ fun UsersListForAdmin(
                 }, onUserDelete = { user: ObjUser ->
                     onUserDelete(user)
                 })
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(modifier = Modifier.height(5.dp))
             }
         }
     }
@@ -57,7 +57,7 @@ fun ProjectListForAdmin(
                 }, onDocumentDelete = { document: ObjDocument ->
                     onDocumentDelete(document)
                 })
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(modifier = Modifier.height(5.dp))
             }
         }
     }

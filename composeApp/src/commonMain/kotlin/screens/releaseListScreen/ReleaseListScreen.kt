@@ -1,5 +1,6 @@
 package screens.releaseListScreen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -21,9 +22,13 @@ import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import coil3.compose.AsyncImage
+import colors.asColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
 import repository.CommonRepository
 import repository.models.ApiResult
 import repository.models.data.ObjDocument
@@ -115,15 +120,32 @@ class ReleaseListScreen(
             })
 
             Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                ReleaseItemsList(
-                    listOfReleases = releasesListState,
-                    onCardClick = { doc ->
 
-                    },
-                    onDeleteClick = { doc ->
+                if (releasesListState.isNotEmpty() or isLoading){
+                    ReleaseItemsList(
+                        listOfReleases = releasesListState,
+                        onCardClick = { doc ->
+
+                        },
+                        onDeleteClick = { doc ->
+
+                        }
+                    )
+                }else{
+
+                    Box(modifier = Modifier.fillMaxSize().background(colors.PLAIN_WHITE .asColor()),
+                        contentAlignment = Alignment.Center){
+                        AsyncImage(
+                            model = CommonRepository.NO_DATA_FOUND_PLACEHOLDER,
+                            contentDescription = null
+                        )
 
                     }
-                )
+
+
+                }
+
+
             }
 
         }

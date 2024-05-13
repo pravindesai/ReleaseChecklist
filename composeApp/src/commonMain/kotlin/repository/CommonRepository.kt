@@ -47,10 +47,12 @@ import strings.encrypt
 import kotlin.time.Duration.Companion.seconds
 
 object CommonRepository {
-    private var currentUser: IntUser? = null
+    private var currentAdmin: ObjAdmin? = null
+    private var currentUser: ObjUser? = null
+    private var currentUserAdminId: String? = null
 
-    const val BASE_URL =
-        "firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/documents"
+    const val NO_DATA_FOUND_PLACEHOLDER = "https://firebasestorage.googleapis.com/v0/b/releasechecklist-kmm-app.appspot.com/o/no_data_found.jpg?alt=media&token=9e29ae54-6bfd-412e-97fa-05feea6a38c9"
+    const val BASE_URL = "firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/documents"
     const val HTTPS_BASE_URL = "https://$BASE_URL"
     const val ADMIN = "admin"
     const val USER = "user"
@@ -60,8 +62,8 @@ object CommonRepository {
     const val QUERYPATH = ":runQuery"
 
     fun getCurrentAdminId(): String? {
-        return (currentUser as? ObjAdmin)?.fields?.adminId?.stringValue
-            ?: (currentUser as? ObjAdmin)?.fields?.adminid?.stringValue
+        return currentAdmin?.fields?.adminId?.stringValue
+            ?: currentAdmin?.fields?.adminid?.stringValue ?:  currentUserAdminId
     }
 
     fun getCurrentUserId():String ? {
@@ -100,10 +102,17 @@ object CommonRepository {
     }
 
 
-    fun getLoggedInUser() = currentUser
+    fun getLoggedInUser() = currentAdmin?:currentUser
 
     fun setCurrentUser(user: IntUser?) {
-        currentUser = user
+        if (user==null){
+            currentAdmin = null
+            currentUser = null
+        }
+        when(user){
+            is ObjAdmin -> currentAdmin = user
+            is ObjUser -> currentUser = user
+        }
     }
 
     suspend fun trySignIn(
@@ -127,6 +136,7 @@ object CommonRepository {
                                 userPassword?.encrypt()
                             )
                         setCurrentUser(adminOfMatchingId.takeIf { isLoggedIn })
+
                         Pair(isLoggedIn, adminOfMatchingId)
                     } else {
                         setCurrentUser(null)

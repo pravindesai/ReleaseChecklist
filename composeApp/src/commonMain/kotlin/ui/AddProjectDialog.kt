@@ -71,7 +71,7 @@ fun AddProjectDialog(
                             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                             singleLine = true,
                             label = {
-                                androidx.compose.material3.Text("Enter organization")
+                                androidx.compose.material3.Text("Enter project name")
                             },
                             textStyle = TextStyle(
                                 color = colors.MAT_DARK.asColor(),

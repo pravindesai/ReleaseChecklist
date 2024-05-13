@@ -43,7 +43,7 @@ fun UserView(
         }) {
         Row(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(
-                start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp
+                start = 15.dp, end = 15.dp, top = 15.dp, bottom = 15.dp
             )
         ) {
             Text(
@@ -84,7 +84,7 @@ fun DocumentView(
         }) {
         Row(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(
-                start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp
+                start = 15.dp, end = 15.dp, top = 15.dp, bottom = 15.dp
             )
         ) {
             Text(
