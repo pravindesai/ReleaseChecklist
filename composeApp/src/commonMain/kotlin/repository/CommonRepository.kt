@@ -22,6 +22,7 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import repository.models.ApiResult
 import repository.models.Field
@@ -46,9 +47,10 @@ import strings.encrypt
 import kotlin.time.Duration.Companion.seconds
 
 object CommonRepository {
-    private var currentUser:IntUser?  = null
+    private var currentUser: IntUser? = null
 
-    const val BASE_URL = "firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/documents"
+    const val BASE_URL =
+        "firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/documents"
     const val HTTPS_BASE_URL = "https://$BASE_URL"
     const val ADMIN = "admin"
     const val USER = "user"
@@ -57,33 +59,39 @@ object CommonRepository {
 
     const val QUERYPATH = ":runQuery"
 
-    fun getCurrentAdminId():String?{
-        return (currentUser as? ObjAdmin)?.fields?.adminId?.stringValue ?: (currentUser as? ObjAdmin)?.fields?.adminid?.stringValue
+    fun getCurrentAdminId(): String? {
+        return (currentUser as? ObjAdmin)?.fields?.adminId?.stringValue
+            ?: (currentUser as? ObjAdmin)?.fields?.adminid?.stringValue
     }
 
-    private val client = HttpClient(){
+    fun getCurrentUserId():String ? {
+        return (currentUser as? ObjUser)?.fields?.userId?.stringValue
+            ?: (currentUser as? ObjUser)?.fields?.userid?.stringValue
+    }
+
+    private val client = HttpClient() {
         install(Resources)
-        install(ContentNegotiation){
+        install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
                 isLenient = true
             })
         }
-        install(Logging){
+        install(Logging) {
             logger = Logger.DEFAULT
             level = LogLevel.ALL
         }
         defaultRequest {
             host = BASE_URL
-            url{
+            url {
                 protocol = URLProtocol.HTTPS
             }
         }
     }
 
-    private val clientWithoutDefaults = HttpClient(){
+    private val clientWithoutDefaults = HttpClient() {
         install(Resources)
-        install(ContentNegotiation){
+        install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
                 isLenient = true
@@ -98,92 +106,105 @@ object CommonRepository {
         currentUser = user
     }
 
-    suspend fun trySignIn(userId:String, userPassword:String, userType: UserType):Pair<Boolean, IntUser?>{
-        when(userType){
+    suspend fun trySignIn(
+        userId: String,
+        userPassword: String,
+        userType: UserType
+    ): Pair<Boolean, IntUser?> {
+        when (userType) {
             UserType.ADMIN -> {
                 return try {
-                    val httpResponse =  client.get {
+                    val httpResponse = client.get {
                         url {
                             appendPathSegments(ADMIN, userId)
                         }
                     }
                     logHttpResponse(httpResponse)
-                    if (httpResponse.status == HttpStatusCode.OK){
+                    if (httpResponse.status == HttpStatusCode.OK) {
                         val adminOfMatchingId = httpResponse.body<ObjAdmin?>()
-                        val isLoggedIn = adminOfMatchingId?.fields?.adminid?.stringValue.equals(userId) and adminOfMatchingId?.fields?.adminpass?.stringValue.equals(userPassword?.encrypt())
+                        val isLoggedIn =
+                            adminOfMatchingId?.fields?.adminid?.stringValue.equals(userId) and adminOfMatchingId?.fields?.adminpass?.stringValue.equals(
+                                userPassword?.encrypt()
+                            )
                         setCurrentUser(adminOfMatchingId.takeIf { isLoggedIn })
                         Pair(isLoggedIn, adminOfMatchingId)
-                    }else{
+                    } else {
                         setCurrentUser(null)
                         Pair(false, null)
                     }
 
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     setCurrentUser(null)
-                    println("*** "+e.message)
+                    println("*** " + e.message)
                     Pair(false, null)
                 }
             }
+
             UserType.USER -> {
                 return try {
-                    val httpResponse =  client.get {
+                    val httpResponse = client.get {
                         url {
                             appendPathSegments(USER, userId)
                         }
                     }
                     logHttpResponse(httpResponse)
-                    if (httpResponse.status == HttpStatusCode.OK){
+                    if (httpResponse.status == HttpStatusCode.OK) {
                         val userOfMatchingId = httpResponse.body<ObjUser?>()
-                        val isLoggedIn =userOfMatchingId?.fields?.userid?.stringValue.equals(userId) and userOfMatchingId?.fields?.userpass?.stringValue.equals(userPassword.encrypt())
+                        val isLoggedIn =
+                            userOfMatchingId?.fields?.userid?.stringValue.equals(userId) and userOfMatchingId?.fields?.userpass?.stringValue.equals(
+                                userPassword.encrypt()
+                            )
                         setCurrentUser(userOfMatchingId.takeIf { isLoggedIn })
                         Pair(isLoggedIn, userOfMatchingId)
 
-                    }else{
+                    } else {
                         setCurrentUser(null)
                         Pair(false, null)
                     }
 
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     setCurrentUser(null)
-                    println("*** "+e.message)
+                    println("*** " + e.message)
                     Pair(false, null)
                 }
             }
         }
     }
 
-    suspend fun signOut():Boolean{
+    suspend fun signOut(): Boolean {
         delay(2.seconds)
         setCurrentUser(null)
         return true
     }
 
-    suspend fun addUser(userId: String, userPass: String):ApiResult<ObjUser>{
+    suspend fun addUser(userId: String, userPass: String): ApiResult<ObjUser> {
         return try {
 
-            val httpResponse =  client.post(USER) {
+            val httpResponse = client.post(USER) {
                 contentType(ContentType.Application.Json)
-                url{
+                url {
                     parameters.append("documentId", userId)
                 }
-                setBody(AddAdminPayload(
-                    fields = Fields(
-                        userId = StringValue(stringValue = userId),
-                        userpass = StringValue(stringValue = userPass.encrypt()),
-                        adminId = StringValue(stringValue = getCurrentAdminId()),
+                setBody(
+                    AddAdminPayload(
+                        fields = Fields(
+                            userId = StringValue(stringValue = userId),
+                            userpass = StringValue(stringValue = userPass.encrypt()),
+                            adminId = StringValue(stringValue = getCurrentAdminId()),
+                        )
                     )
-                ))
+                )
             }
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val user = httpResponse.body<ObjUser?>()
                 ApiResult(
                     success = true,
                     data = user,
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = null,
@@ -191,8 +212,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = null,
@@ -201,44 +222,46 @@ object CommonRepository {
         }
     }
 
-    suspend fun removeUser(userId:String):Boolean{
+    suspend fun removeUser(userId: String): Boolean {
         delay(2.seconds)
         return true
     }
 
-    suspend fun getAllUsersForAdmin(adminId:String): ApiResult<List<ObjUser>>?{
+    suspend fun getAllUsersForAdmin(adminId: String): ApiResult<List<ObjUser>>? {
 
         return try {
 
-            val httpResponse =  clientWithoutDefaults.post(HTTPS_BASE_URL.plus(QUERYPATH)) {
+            val httpResponse = clientWithoutDefaults.post(HTTPS_BASE_URL.plus(QUERYPATH)) {
                 contentType(ContentType.Application.Json)
-                setBody(Query(
-                    structuredQuery = StructuredQuery(
-                        from = listOf(FromItem(collectionId = USER)),
-                        where = Where(
-                            fieldFilter = FieldFilter(
-                                field = Field(
-                                    fieldPath = "adminId"
-                                ),
-                                op = "EQUAL",
-                                value = Value(
-                                    stringValue = adminId
+                setBody(
+                    Query(
+                        structuredQuery = StructuredQuery(
+                            from = listOf(FromItem(collectionId = USER)),
+                            where = Where(
+                                fieldFilter = FieldFilter(
+                                    field = Field(
+                                        fieldPath = "adminId"
+                                    ),
+                                    op = "EQUAL",
+                                    value = Value(
+                                        stringValue = adminId
+                                    )
                                 )
                             )
                         )
                     )
-                ))
+                )
             }
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val listOfUsers = httpResponse.body<List<ObjListOfUsersItem>>()
                 ApiResult(
                     success = true,
                     data = listOfUsers.map { it.document }.filterNotNull(),
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = emptyList(),
@@ -246,8 +269,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = emptyList(),
@@ -256,39 +279,41 @@ object CommonRepository {
         }
     }
 
-    suspend fun getAllProjectForAdmin(adminId:String): ApiResult<List<ObjDocument>>?{
+    suspend fun getAllProjectForAdmin(adminId: String): ApiResult<List<ObjDocument>>? {
 
         return try {
 
-            val httpResponse =  clientWithoutDefaults.post(HTTPS_BASE_URL.plus(QUERYPATH)) {
+            val httpResponse = clientWithoutDefaults.post(HTTPS_BASE_URL.plus(QUERYPATH)) {
                 contentType(ContentType.Application.Json)
-                setBody(Query(
-                    structuredQuery = StructuredQuery(
-                        from = listOf(FromItem(collectionId = PROJECT)),
-                        where = Where(
-                            fieldFilter = FieldFilter(
-                                field = Field(
-                                    fieldPath = "adminId"
-                                ),
-                                op = "EQUAL",
-                                value = Value(
-                                    stringValue = adminId
+                setBody(
+                    Query(
+                        structuredQuery = StructuredQuery(
+                            from = listOf(FromItem(collectionId = PROJECT)),
+                            where = Where(
+                                fieldFilter = FieldFilter(
+                                    field = Field(
+                                        fieldPath = "adminId"
+                                    ),
+                                    op = "EQUAL",
+                                    value = Value(
+                                        stringValue = adminId
+                                    )
                                 )
                             )
                         )
                     )
-                ))
+                )
             }
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val listOfUsers = httpResponse.body<List<ObjListOfProjectItem?>?>()
                 ApiResult(
                     success = true,
                     data = listOfUsers?.map { it?.document }?.filterNotNull(),
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = emptyList(),
@@ -296,8 +321,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = emptyList(),
@@ -307,32 +332,34 @@ object CommonRepository {
     }
 
 
-    suspend fun addProject(projectName: String):ApiResult<ObjDocument>{
+    suspend fun addProject(projectName: String): ApiResult<ObjDocument> {
         return try {
 
-            val httpResponse =  client.post(PROJECT) {
+            val httpResponse = client.post(PROJECT) {
                 contentType(ContentType.Application.Json)
-                url{
+                url {
                     parameters.append("documentId", projectName)
                 }
-                setBody(AddAdminPayload(
-                    fields = Fields(
-                        projectId = StringValue(stringValue = projectName),
-                        projectName = StringValue(stringValue = projectName),
-                        adminId = StringValue(stringValue = getCurrentAdminId()),
+                setBody(
+                    AddAdminPayload(
+                        fields = Fields(
+                            projectId = StringValue(stringValue = projectName),
+                            projectName = StringValue(stringValue = projectName),
+                            adminId = StringValue(stringValue = getCurrentAdminId()),
+                        )
                     )
-                ))
+                )
             }
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val user = httpResponse.body<ObjDocument?>()
                 ApiResult(
                     success = true,
                     data = user,
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = null,
@@ -340,8 +367,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = null,
@@ -351,33 +378,35 @@ object CommonRepository {
 
     }
 
-    suspend fun addAdmin(adminId: String, adminPass:String, org:String?):ApiResult<ObjDocument>{
+    suspend fun addAdmin(adminId: String, adminPass: String, org: String?): ApiResult<ObjDocument> {
         return try {
 
-            val httpResponse =  client.post(ADMIN) {
+            val httpResponse = client.post(ADMIN) {
                 contentType(ContentType.Application.Json)
-                url{
+                url {
                     parameters.append("documentId", adminId)
                 }
-                setBody(AddAdminPayload(
-                    fields = Fields(
-                        adminId = StringValue(stringValue = adminId),
-                        adminpass = StringValue(stringValue = adminPass.encrypt()),
-                        org = StringValue(stringValue = org),
-                        addedBy = StringValue(getCurrentAdminId())
+                setBody(
+                    AddAdminPayload(
+                        fields = Fields(
+                            adminId = StringValue(stringValue = adminId),
+                            adminpass = StringValue(stringValue = adminPass.encrypt()),
+                            org = StringValue(stringValue = org),
+                            addedBy = StringValue(getCurrentAdminId())
+                        )
                     )
-                ))
+                )
             }
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val user = httpResponse.body<ObjDocument?>()
                 ApiResult(
                     success = true,
                     data = user,
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = null,
@@ -385,8 +414,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = null,
@@ -397,29 +426,29 @@ object CommonRepository {
     }
 
 
-    suspend fun removeProject(projectId:String):Boolean{
+    suspend fun removeProject(projectId: String): Boolean {
         delay(2.seconds)
         return true
     }
 
-    suspend fun addRelease(releases: Any):Boolean{
+    suspend fun addRelease(releases: Any): Boolean {
         delay(2.seconds)
         return true
     }
 
-    suspend fun removeRelease(releaseId:String):Boolean{
+    suspend fun removeRelease(releaseId: String): Boolean {
         delay(2.seconds)
         return true
     }
 
     private suspend fun logHttpResponse(httpResponse: HttpResponse) {
         println("***********ResponseStart***********")
-        println("URL : "+httpResponse.request.url)
-        println("Method : "+httpResponse.request.method)
-        println("Content : "+httpResponse.request.content)
-        println("Status : "+httpResponse.status)
-        println("ResponseTime : "+httpResponse.responseTime)
-        println("Body : \n"+httpResponse.body<String>())
+        println("URL : " + httpResponse.request.url)
+        println("Method : " + httpResponse.request.method)
+        println("Content : " + httpResponse.request.content)
+        println("Status : " + httpResponse.status)
+        println("ResponseTime : " + httpResponse.responseTime)
+        println("Body : \n" + httpResponse.body<String>())
         println("***********ResponseEnd*************")
     }
 
@@ -427,17 +456,17 @@ object CommonRepository {
 
         return try {
 
-            val httpResponse =  client.delete(USER.plus("/").plus(user.fields?.userId?.stringValue))
+            val httpResponse = client.delete(USER.plus("/").plus(user.fields?.userId?.stringValue))
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val objUser = httpResponse.body<ObjUser>()
                 ApiResult(
                     success = true,
                     data = objUser,
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = null,
@@ -445,8 +474,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = null,
@@ -459,17 +488,18 @@ object CommonRepository {
 
         return try {
 
-            val httpResponse =  client.delete(PROJECT.plus("/").plus(user.fields?.projectId?.stringValue))
+            val httpResponse =
+                client.delete(PROJECT.plus("/").plus(user.fields?.projectId?.stringValue))
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val objUser = httpResponse.body<ObjDocument>()
                 ApiResult(
                     success = true,
                     data = objUser,
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = null,
@@ -477,8 +507,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = null,
@@ -491,17 +521,17 @@ object CommonRepository {
 
         return try {
 
-            val httpResponse =  client.delete(RELEASES.plus(user.fields?.projectId))
+            val httpResponse = client.delete(RELEASES.plus(user.fields?.projectId))
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val objUser = httpResponse.body<ObjDocument>()
                 ApiResult(
                     success = true,
                     data = objUser,
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = null,
@@ -509,8 +539,8 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = null,
@@ -519,25 +549,29 @@ object CommonRepository {
         }
     }
 
-    suspend fun getAllReleasesForProject(objDocument: ObjDocument): ApiResult<List<ObjDocument>>{
+    suspend fun getAllReleasesForProject(objDocument: ObjDocument): ApiResult<List<ObjDocument>> {
 
         return try {
 
-            val httpResponse =  client.get {
+            val httpResponse = client.get {
                 url {
-                    appendPathSegments(PROJECT, objDocument.fields?.projectId?.stringValue?:"", RELEASES )
+                    appendPathSegments(
+                        PROJECT,
+                        objDocument.fields?.projectId?.stringValue ?: "",
+                        RELEASES
+                    )
                 }
             }
             logHttpResponse(httpResponse)
 
-            if (httpResponse.status == HttpStatusCode.OK){
+            if (httpResponse.status == HttpStatusCode.OK) {
                 val listOfUsers = httpResponse.body<ObjListOfReleases>()
                 ApiResult(
                     success = true,
                     data = listOfUsers.documents?.filterNotNull(),
                     message = httpResponse.body<String>()
                 )
-            }else{
+            } else {
                 ApiResult(
                     success = false,
                     data = emptyList(),
@@ -545,14 +579,54 @@ object CommonRepository {
                 )
             }
 
-        }catch (e:Exception){
-            println("*** "+e.message)
+        } catch (e: Exception) {
+            println("*** " + e.message)
             ApiResult(
                 success = false,
                 data = emptyList(),
                 message = e.message
             )
         }
+    }
+
+    suspend fun getAllReleasesForAdmin(): ApiResult<List<ObjDocument>> {
+
+        val allProjects = getAllProjectForAdmin(getCurrentAdminId() ?: "")?.data
+
+        val apiResults = allProjects?.map { getAllReleasesForProject(it) }
+
+        return ApiResult(
+            success = true,
+            data = apiResults?.flatMap { it.data ?: emptyList() }?.filter {
+                (it.fields?.adminId?.stringValue?.equals(
+                    getCurrentAdminId()
+                ) == true) or (it.fields?.adminid?.stringValue?.equals(
+                    getCurrentAdminId()
+                ) == true)
+            },
+            message = ""
+        )
+    }
+
+
+
+    suspend fun getAllReleasesForUser(userId: String): ApiResult<List<ObjDocument>> {
+
+        val allProjects = getAllProjectForAdmin(getCurrentAdminId()?:"")?.data
+
+        val apiResults = allProjects?.map { getAllReleasesForProject(it) }
+
+        return ApiResult(
+            success = true,
+            data = apiResults?.flatMap { it.data ?: emptyList() }?.filter {
+                (it.fields?.userId?.stringValue?.equals(
+                    userId
+                ) == true) or (it.fields?.userid?.stringValue?.equals(
+                    userId
+                ) == true)
+            },
+            message = ""
+        )
     }
 
 

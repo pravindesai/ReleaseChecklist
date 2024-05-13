@@ -54,7 +54,19 @@ class ReleaseListScreen(
         LaunchedEffect(key1 = viewTypeState) {
             when (viewTypeState) {
                 AdminListViewType.Users -> {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        isLoading = true
+                        val result = objUser?.let { getAllReleasesForUser(objUser.fields?.userId?.stringValue?:objUser.fields?.userid?.stringValue?:"") }
 
+                        if (result?.success == true) {
+                            val list = result.data ?: emptyList()
+                            releasesListState = list
+                        } else {
+                            releasesListState = emptyList()
+                            showFailureDialog = Pair(true, result?.message ?: "FAILED")
+                        }
+                        isLoading = false
+                    }
                 }
 
                 AdminListViewType.Projects -> {
@@ -74,7 +86,19 @@ class ReleaseListScreen(
                 }
 
                 AdminListViewType.Releases -> {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        isLoading = true
+                        val result = objDocument?.let { getAllReleasesForAdmin() }
 
+                        if (result?.success == true) {
+                            val list = result.data ?: emptyList()
+                            releasesListState = list
+                        } else {
+                            releasesListState = emptyList()
+                            showFailureDialog = Pair(true, result?.message ?: "FAILED")
+                        }
+                        isLoading = false
+                    }
                 }
             }
         }
@@ -137,6 +161,15 @@ class ReleaseListScreen(
 
 suspend fun getAllReleasesForProject(objDocument: ObjDocument): ApiResult<List<ObjDocument>> {
     return CommonRepository.getAllReleasesForProject(objDocument)
+}
+
+
+suspend fun getAllReleasesForAdmin(): ApiResult<List<ObjDocument>> {
+    return CommonRepository.getAllReleasesForAdmin()
+}
+
+suspend fun getAllReleasesForUser(userId:String): ApiResult<List<ObjDocument>> {
+    return CommonRepository.getAllReleasesForUser(userId)
 }
 
 

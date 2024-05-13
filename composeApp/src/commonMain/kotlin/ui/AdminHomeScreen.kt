@@ -27,6 +27,7 @@ import repository.models.data.ObjAdmin
 import repository.models.data.ObjDocument
 import repository.models.data.ObjUser
 import screens.releaseListScreen.ReleaseListScreen
+import screens.releaseListScreen.getAllReleasesForAdmin
 
 enum class AdminListViewType {
     Users, Projects, Releases
@@ -53,6 +54,7 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
     var deleteRelease by remember { mutableStateOf<Pair<Boolean, ObjDocument?>>(Pair(false, null)) }
 
     var showDeleteDialog by remember { mutableStateOf(Pair(false, "")) }
+    var allReleasesList by remember { mutableStateOf(releasesList) }
 
     LaunchedEffect(key1 = deleteUser, block = {
         if (deleteUser.first) {
@@ -109,17 +111,18 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
                     }
 
                     AdminListViewType.Releases -> {
-                        val apiResult = CommonRepository.getAllProjectForAdmin(
-                            adminState?.fields?.adminid?.stringValue ?: ""
-                        )
-                        if ((apiResult?.success == true).not()) {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val result = getAllReleasesForAdmin()
+
+                            if (result?.success == true) {
+                                val list = result.data ?: emptyList()
+                                allReleasesList = list
+                            } else {
+                                allReleasesList = emptyList()
+                            }
                             isLoading = false
-                            dialogMessage = apiResult?.message ?: "FAILED"
-                            showDialog = true
-                        } else {
-                            isLoading = false
-                            releasesList = apiResult?.data ?: emptyList()
                         }
+
                     }
                 }
             }
@@ -158,16 +161,11 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
                 },
                 onDocumentDelete = { deleteProject = Pair(true, it) })
 
-            AdminListViewType.Releases -> ProjectListForAdmin(
-                modifier = Modifier.fillMaxWidth().weight(1f).animateContentSize(),
-                usersList = releasesList,
-                onDocumentSelected = {
-                    tabNavigator.parent?.push(ReleaseListScreen(
-                        viewType = AdminListViewType.Releases,
-                        objDocument = it
-                    ))
-                },
-                onDocumentDelete = { deleteRelease = Pair(true, it) })
+            AdminListViewType.Releases -> {
+                ReleasesTabContainer(
+                    releasesList = allReleasesList
+                )
+            }
         }
 
     }

@@ -74,7 +74,11 @@ fun ReleaseItemsList(
                     listOfReleasesState = newList
                 }
             )
-            Spacer(modifier = Modifier.height(15.dp))
+            if (listOfReleasesState.lastOrNull() == it){
+                Spacer(modifier = Modifier.height(80.dp))
+            }else{
+                Spacer(modifier = Modifier.height(15.dp))
+            }
         }
     }
 }
