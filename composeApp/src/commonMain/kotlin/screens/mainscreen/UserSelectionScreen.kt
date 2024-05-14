@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,10 +70,15 @@ class UserSelectionScreen : Screen {
                 (navigator.lastItem == it) or (it is SplashScreen)
             }
             coroutineScope.launch {
-                delay(70)
-                tileOne = true
-                delay(70)
-                tileTwo = true
+                launch {
+                    delay(100)
+                    tileOne = true
+                }
+                launch {
+                    delay(200)
+                    tileTwo = true
+                }
+
             }
         }
 
@@ -83,8 +91,8 @@ class UserSelectionScreen : Screen {
                 transitionSpec = {
                     slideInHorizontally(
                         animationSpec = spring(
-                            stiffness = Spring.StiffnessLow,
-                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessVeryLow,
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
                             visibilityThreshold = IntOffset.VisibilityThreshold
                         ),
                         initialOffsetX = { fullWidth -> fullWidth }
@@ -126,15 +134,15 @@ class UserSelectionScreen : Screen {
                 transitionSpec = {
                     slideInHorizontally(
                         animationSpec = spring(
-                            stiffness = Spring.StiffnessLow,
-                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessVeryLow,
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
                             visibilityThreshold = IntOffset.VisibilityThreshold
                         ),
-                        initialOffsetX = { fullWidth -> fullWidth }
+                        initialOffsetX = { fullWidth -> -fullWidth }
                     ) togetherWith
                             slideOutHorizontally(
                                 animationSpec = tween(200),
-                                targetOffsetX = { fullWidth -> -fullWidth }
+                                targetOffsetX = { fullWidth -> fullWidth }
                             )
                 }
             ) { targetState ->

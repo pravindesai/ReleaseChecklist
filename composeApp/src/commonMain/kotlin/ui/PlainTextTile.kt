@@ -2,6 +2,7 @@ package ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,19 +25,22 @@ fun PlainTextTile(
     textColor: Color = colors.MAT_DARK.asColor(),
     onClick: () -> Unit = {}
 ) {
-    Row(
-        modifier = modifier.clickable {
-            onClick()
-        }.fillMaxWidth().wrapContentHeight(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            color = textColor,
-            text = text,
-            modifier = Modifier.wrapContentSize(),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
+    Column(modifier = Modifier.clickable {
+        onClick()
+    }) {
+        Row(
+            modifier = modifier.fillMaxWidth().wrapContentHeight(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                color = textColor,
+                text = text,
+                modifier = Modifier.wrapContentSize(),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
+
 }

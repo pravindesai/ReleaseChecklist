@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import colors.MAT_DARK
+import colors.PRIMARY_ORANGE
 import colors.PRIMARY_ORANGE_LIGHT
 import colors.asColor
 
@@ -18,7 +19,7 @@ fun AppProgressBar(){
         contentAlignment = Alignment.Center
     ){
         CircularProgressIndicator(
-            trackColor = PRIMARY_ORANGE_LIGHT.asColor(),
+            trackColor = PRIMARY_ORANGE.asColor(),
             color = MAT_DARK.asColor(),
 
             )
