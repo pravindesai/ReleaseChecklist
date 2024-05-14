@@ -51,7 +51,7 @@ object CommonRepository {
     private var currentUser: ObjUser? = null
     private var currentUserAdminId: String? = null
 
-    const val NO_DATA_FOUND_PLACEHOLDER = "https://firebasestorage.googleapis.com/v0/b/releasechecklist-kmm-app.appspot.com/o/no_data_found.jpg?alt=media&token=9e29ae54-6bfd-412e-97fa-05feea6a38c9"
+    const val NO_DATA_FOUND_PLACEHOLDER = "https://firebasestorage.googleapis.com/v0/b/releasechecklist-kmm-app.appspot.com/o/no_data_found.jpg?alt=media&token=dfe8e268-232c-414e-904e-98080dcfdf3e"
     const val BASE_URL = "firestore.googleapis.com/v1/projects/releasechecklist-kmm-app/databases/(default)/documents"
     const val HTTPS_BASE_URL = "https://$BASE_URL"
     const val ADMIN = "admin"

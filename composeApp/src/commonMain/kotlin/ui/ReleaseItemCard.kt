@@ -1,6 +1,14 @@
 package ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import colors.GREEN
@@ -42,6 +52,8 @@ import colors.MAT_DARK
 import colors.MAT_DARK_LIGHT
 import colors.RED
 import colors.asColor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import repository.models.data.ObjDocument
 
 @Composable
@@ -74,9 +86,9 @@ fun ReleaseItemsList(
                     listOfReleasesState = newList
                 }
             )
-            if (listOfReleasesState.lastOrNull() == it){
+            if (listOfReleasesState.lastOrNull() == it) {
                 Spacer(modifier = Modifier.height(80.dp))
-            }else{
+            } else {
                 Spacer(modifier = Modifier.height(15.dp))
             }
         }
@@ -106,13 +118,13 @@ fun ReleaseItem(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .clickable {
-                           onCardClick(releaseState)
+                    onCardClick(releaseState)
                 },
         ) {
 
             RowTableTitleHeader(
                 title = releaseState.fields?.releaseId?.stringValue ?: "",
-                releaseState,
+                objDoc = releaseState,
                 onHeaderClicked = {
                     releaseState = releaseState.copy(isExpanded = releaseState.isExpanded.not())
                     onExpandClick(releaseState)
@@ -122,31 +134,57 @@ fun ReleaseItem(
                     onExpandClick(it)
                 })
 
-            AnimatedVisibility(releaseState.isExpanded) {
-
+            if(releaseState.isExpanded) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
                 ) {
-                    RowOfTable("Project", releaseState.fields?.projectName?.stringValue ?: "N/A")
-                    RowOfTable("Branch", releaseState.fields?.branchName?.stringValue ?: "N/A")
-                    RowOfTable("Version", releaseState.fields?.releaseId?.stringValue ?: "N/A")
                     RowOfTable(
-                        "Released On",
-                        releaseState.fields?.releaseDateTimeEpoch?.stringValue ?: "N/A"
+                        position = 1,
+                        key = "Project",
+                        value = releaseState.fields?.projectName?.stringValue ?: "N/A"
                     )
-                    RowOfTable("Tag", releaseState.fields?.tag?.stringValue ?: "N/A")
-                    RowOfTable("Released By", releaseState.fields?.userId?.stringValue ?: "N/A")
-                    RowOfTable("Admin Id", releaseState.fields?.adminId?.stringValue ?: "N/A")
                     RowOfTable(
-                        "ControlCenter ID",
-                        if (releaseState.fields?.baseCampIDChecked?.booleanValue == true) "Checked" else "Not Checked",
+                        position = 2,
+                        key = "Branch",
+                        value = releaseState.fields?.branchName?.stringValue ?: "N/A"
+                    )
+                    RowOfTable(
+                        position = 3,
+                        key = "Version",
+                        value = releaseState.fields?.releaseId?.stringValue ?: "N/A"
+                    )
+                    RowOfTable(
+                        position = 4,
+                        key = "Released On",
+                        value = releaseState.fields?.releaseDateTimeEpoch?.stringValue ?: "N/A"
+                    )
+                    RowOfTable(
+                        position = 5,
+                        key = "Tag",
+                        value = releaseState.fields?.tag?.stringValue ?: "N/A"
+                    )
+                    RowOfTable(
+                        position = 6,
+                        key = "Released By",
+                        value = releaseState.fields?.userId?.stringValue ?: "N/A"
+                    )
+                    RowOfTable(
+                        position = 7,
+                        key = "Admin Id",
+                        value = releaseState.fields?.adminId?.stringValue ?: "N/A"
+                    )
+                    RowOfTable(
+                        position = 8,
+                        key = "ControlCenter ID",
+                        value = if (releaseState.fields?.baseCampIDChecked?.booleanValue == true) "Checked" else "Not Checked",
                         isWarning = (releaseState.fields?.baseCampIDChecked?.booleanValue == true)
                     )
                     RowOfTable(
-                        "ControlCenter Log",
-                        if (releaseState.fields?.baseCampLogCheked?.booleanValue == true) "Checked" else "Not Checked",
+                        position = 9,
+                        key = "ControlCenter Log",
+                        value = if (releaseState.fields?.baseCampLogCheked?.booleanValue == true) "Checked" else "Not Checked",
                         isWarning = (releaseState.fields?.baseCampLogCheked?.booleanValue == true)
                     )
                 }
@@ -166,75 +204,134 @@ fun RowTableTitleHeader(
     LaunchedEffect(objDoc) {
         objDocState = objDoc
     }
-    Row(
-        modifier = Modifier
-            .background(MAT_DARK.asColor())
-            .padding(1.dp)
-            .background(Color.White)
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(6.dp).clickable {
-                                     onHeaderClicked(objDocState)
-            },
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            fontStyle = FontStyle.Italic,
-            modifier = Modifier
-                .padding(2.dp),
-            fontWeight = FontWeight.Bold,
-            color = MAT_DARK.asColor(),
-            textAlign = TextAlign.Start,
-        )
+    val coroutineScope = rememberCoroutineScope()
+    var visibilityState by remember { mutableStateOf(false) }
 
-
-        Icon(
-            modifier = Modifier.size(24.dp).rotate(if (objDocState.isExpanded) 0f else 180f)
-                .clickable {
-                    objDocState = objDocState.copy(isExpanded = objDocState.isExpanded.not())
-                    onExpandClick(objDocState)
-                },
-            imageVector = Icons.Default.KeyboardArrowUp,
-            contentDescription = "",
-            tint = MAT_DARK.asColor()
-        )
+    LaunchedEffect(Unit){
+        coroutineScope.launch {
+            delay(15)
+            visibilityState = true
+        }
     }
+
+    AnimatedContent(
+        targetState = visibilityState,
+        transitionSpec = {
+            slideInHorizontally(
+                animationSpec = spring(
+                    stiffness = Spring.StiffnessLow,
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    visibilityThreshold = IntOffset.VisibilityThreshold
+                ),
+                initialOffsetX = { fullWidth -> -fullWidth }
+            ) togetherWith
+                    slideOutHorizontally(
+                        animationSpec = tween(200),
+                        targetOffsetX = { fullWidth -> fullWidth }
+                    )
+        }
+    ) { targetState ->
+        Row(
+            modifier = Modifier
+                .background(if (targetState) MAT_DARK.asColor() else Color.Transparent)
+                .padding(1.dp)
+                .background(Color.White)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(6.dp).clickable {
+                    onHeaderClicked(objDocState)
+                },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (targetState) title else "",
+                fontSize = 16.sp,
+                fontStyle = FontStyle.Italic,
+                modifier = Modifier
+                    .padding(2.dp),
+                fontWeight = FontWeight.Bold,
+                color = MAT_DARK.asColor(),
+                textAlign = TextAlign.Start,
+            )
+
+
+            Icon(
+                modifier = Modifier.size(24.dp).rotate(if (objDocState.isExpanded) 0f else 180f)
+                    .clickable {
+                        objDocState = objDocState.copy(isExpanded = objDocState.isExpanded.not())
+                        onExpandClick(objDocState)
+                    },
+                imageVector = Icons.Default.KeyboardArrowUp,
+                contentDescription = "",
+                tint = if (targetState) MAT_DARK.asColor() else Color.Transparent
+            )
+        }
+    }
+
+
 }
 
 @Composable
-fun RowOfTable(key: String, value: String, isWarning: Boolean? = null) {
-    Row(
-        modifier = Modifier
-            .background(MAT_DARK_LIGHT.asColor())
-            .padding(start = (0.5).dp, end = (0.5).dp, bottom = (0.5).dp)
-            .background(Color.White)
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(6.dp)
-    ) {
-        Text(
-            text = key,
-            fontSize = 16.sp,
-            modifier = Modifier.weight(1f).padding(2.dp),
-            fontWeight = FontWeight.Medium,
-            color = MAT_DARK.asColor(),
-            textAlign = TextAlign.Start,
-        )
+fun RowOfTable(position:Int = 0, key: String, value: String, isWarning: Boolean? = null) {
+    val coroutineScope = rememberCoroutineScope()
+    var visibilityState by remember { mutableStateOf(false) }
 
-        Text(
-            text = value,
-            fontSize = 16.sp,
-            modifier = Modifier.weight(1f).padding(2.dp),
-            fontWeight = FontWeight.Normal,
-            color = when (isWarning?.not()) {
-                true -> RED.asColor()
-                false -> GREEN.asColor()
-                else -> MAT_DARK.asColor()
-            },
-            textAlign = TextAlign.Start,
-        )
+    LaunchedEffect(Unit){
+        coroutineScope.launch {
+            delay(position.times(15).toLong())
+            visibilityState = true
+        }
     }
+    AnimatedContent(
+        targetState = visibilityState,
+        transitionSpec = {
+            slideInHorizontally(
+                animationSpec = spring(
+                    stiffness = Spring.StiffnessLow,
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    visibilityThreshold = IntOffset.VisibilityThreshold
+                ),
+                initialOffsetX = { fullWidth -> fullWidth }
+            ) togetherWith
+                    slideOutHorizontally(
+                        animationSpec = tween(150),
+                        targetOffsetX = { fullWidth -> -fullWidth }
+                    )
+        }
+    ) { targetState ->
+        Row(
+            modifier = Modifier
+                .background(color = if (targetState) colors.MAT_DARK_LIGHT.asColor() else Color.Transparent)
+                .padding(start = (0.5).dp, end = (0.5).dp, bottom = (0.5).dp)
+                .background(Color.White)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(6.dp)
+        ) {
+            Text(
+                text = if (targetState) key else "",
+                fontSize = 16.sp,
+                modifier = Modifier.weight(1f).padding(2.dp),
+                fontWeight = FontWeight.Medium,
+                color = MAT_DARK.asColor(),
+                textAlign = TextAlign.Start,
+            )
+
+            Text(
+                text = if (targetState) value else "",
+                fontSize = 16.sp,
+                modifier = Modifier.weight(1f).padding(2.dp),
+                fontWeight = FontWeight.Normal,
+                color = when (isWarning?.not()) {
+                    true -> RED.asColor()
+                    false -> GREEN.asColor()
+                    else -> MAT_DARK.asColor()
+                },
+                textAlign = TextAlign.Start,
+            )
+        }
+
+    }
+
 }

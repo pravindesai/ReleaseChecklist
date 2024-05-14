@@ -21,14 +21,18 @@ fun UsersListForAdmin(
     onUserSelected: (ObjUser) -> Unit = {},
     onUserDelete: (ObjUser) -> Unit = {}
 ) {
+    val layzListState = rememberLazyListState()
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(5.dp),
-        state = rememberLazyListState()
+        state = layzListState
     ) {
         items(usersList) {
             Column {
-                UserView(it, onUserSelected = { user: ObjUser ->
+                UserView(objUser = it,
+                    delay = (0..10).random().toLong(),
+                    onUserSelected = { user: ObjUser ->
                     onUserSelected(user)
                 }, onUserDelete = { user: ObjUser ->
                     onUserDelete(user)
@@ -41,7 +45,8 @@ fun UsersListForAdmin(
 
 @Composable
 fun ProjectListForAdmin(
-    modifier: Modifier = Modifier, usersList: List<ObjDocument>,
+    modifier: Modifier = Modifier,
+    usersList: List<ObjDocument>,
     onDocumentSelected: (ObjDocument) -> Unit = {},
     onDocumentDelete: (ObjDocument) -> Unit = {}
 ) {
@@ -52,7 +57,9 @@ fun ProjectListForAdmin(
     ) {
         items(usersList) {
             Column {
-                DocumentView(it, onDocumentSelected = { document: ObjDocument ->
+                DocumentView(objDocument = it,
+                    delay = (0..10).random().toLong(),
+                    onDocumentSelected = { document: ObjDocument ->
                     onDocumentSelected(document)
                 }, onDocumentDelete = { document: ObjDocument ->
                     onDocumentDelete(document)

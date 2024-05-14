@@ -134,7 +134,7 @@ class SettingsScreen : Screen {
                 }
             ) { targetState ->
                 PlainTextTile(
-                    modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent),
+                    modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
                     textColor = colors.MAT_WHITE.asColor(),
                     text = "Add User",
                     onClick = {
@@ -165,7 +165,7 @@ class SettingsScreen : Screen {
                 }
             ) { targetState ->
                 PlainTextTile(
-                    modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent),
+                    modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
                     textColor = colors.MAT_WHITE.asColor(),
                     text = "Add Project",
                     onClick = {
@@ -198,7 +198,7 @@ class SettingsScreen : Screen {
                     }
                 ) { targetState ->
                     PlainTextTile(
-                        modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent),
+                        modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
                         textColor = colors.MAT_WHITE.asColor(),
                         text = "Add Admin",
                         onClick = {
@@ -231,7 +231,7 @@ class SettingsScreen : Screen {
                 }
             ) { targetState ->
                 PlainTextTile(
-                    modifier = Modifier.background(color = if (targetState) colors.RED.asColor() else Color.Transparent),
+                    modifier = Modifier.background(color = if (targetState) colors.RED.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
                     textColor = colors.MAT_WHITE.asColor(),
                     text = "Sign Out",
                     onClick = {

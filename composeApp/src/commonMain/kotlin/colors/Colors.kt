@@ -19,5 +19,9 @@ val GREEN = Triple(147,	197,	33)
 val RED = Triple(	216,	63,	63)
 
 val LIGHT_GRAY = Triple(	115, 147, 179)
+val LIGHT_GRAY_TRANSPARENT = Triple(	115, 147, 179)
+val LIGHT_GRAY_SHADOW = Triple(	116, 148, 180)
+
+
 
 fun Triple<Int, Int, Int>.asColor() = Color(this.first, this.second, this.third)

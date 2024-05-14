@@ -27,7 +27,7 @@ fun PlainTextTile(
     Row(
         modifier = modifier.clickable {
             onClick()
-        }.fillMaxWidth().wrapContentHeight().padding(top = 50.dp, bottom = 50.dp),
+        }.fillMaxWidth().wrapContentHeight(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
