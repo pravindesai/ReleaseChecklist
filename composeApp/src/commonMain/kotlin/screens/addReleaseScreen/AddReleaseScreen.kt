@@ -114,7 +114,7 @@ class AddReleaseScreen : Screen {
         ModalBottomSheetLayout(
             modifier = Modifier.fillMaxSize(),
             sheetState = modalSheetState,
-            sheetShape = RoundedCornerShape(0.dp),
+            sheetShape = RoundedCornerShape(15.dp),
             sheetContent = {
                 dialogLayout.let {
                     it()
