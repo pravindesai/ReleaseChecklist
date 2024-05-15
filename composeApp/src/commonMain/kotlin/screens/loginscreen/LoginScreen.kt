@@ -50,6 +50,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import repository.CommonRepository
 import repository.models.data.IntUser
+import repository.models.data.ObjAdmin
 import screens.dashboardscreen.DashboardScreen
 import strings.UserType
 import ui.AppAlertDialog
@@ -60,8 +61,8 @@ class LoginScreen(val userType: UserType) : Screen {
     override fun Content() {
         val coroutineScope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
-        var id by remember { mutableStateOf("admin123") }
-        var password by remember { mutableStateOf("admin123") }
+        var id by remember { mutableStateOf(if(userType == UserType.ADMIN) "admin123" else "pravindesai100") }
+        var password by remember { mutableStateOf(if(userType == UserType.ADMIN) "admin123" else "pravindesai100") }
         var isLoading by remember { mutableStateOf(false) }
         var isSignInFailed by remember { mutableStateOf(false) }
 
@@ -70,17 +71,17 @@ class LoginScreen(val userType: UserType) : Screen {
 
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ElevatedCard(
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .wrapContentHeight()
                     .fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = colors.YELLOW_TINT.asColor(),
+                    containerColor = colors.EXTRA_LIGHT_BG.asColor(),
                 )
 
             ) {
@@ -228,6 +229,8 @@ class LoginScreen(val userType: UserType) : Screen {
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(50.dp))
 
         }
 

@@ -21,6 +21,8 @@ val RED = Triple(	216,	63,	63)
 val LIGHT_GRAY = Triple(	115, 147, 179)
 val LIGHT_GRAY_TRANSPARENT = Triple(	115, 147, 179)
 val LIGHT_GRAY_SHADOW = Triple(	116, 148, 180)
+val EXTRA_LIGHT_BG = Triple(242, 244, 247)
+val EXTRA_LIGHT_GRAY = Triple(223, 228, 235)
 
 
 

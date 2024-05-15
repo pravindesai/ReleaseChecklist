@@ -12,10 +12,14 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Card
@@ -35,6 +39,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 import cafe.adriel.voyager.core.screen.Screen
@@ -82,11 +87,12 @@ class UserSelectionScreen : Screen {
             }
         }
 
-        Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Column(
+            modifier = Modifier.fillMaxSize().background(Color.White),
+            verticalArrangement = Arrangement.Bottom) {
 
             AnimatedContent(
-                modifier = Modifier.weight(adminSectionWeight)
-                    ,
+                modifier = Modifier.wrapContentHeight().fillMaxWidth(),
                 targetState = tileOne,
                 transitionSpec = {
                     slideInHorizontally(
@@ -105,21 +111,21 @@ class UserSelectionScreen : Screen {
             ) { targetState ->
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.background(
-                        color = if (targetState) colors.YELLOW_LIGHT.asColor() else colors.MAT_WHITE.asColor()
-                    ).fillMaxWidth().clickable {
-                            navigateToLoginAs(
-                                navigator = navigator,
-                                userType = UserType.ADMIN
-                            )
-                        }
+                    modifier = Modifier.clickable {
+                        navigateToLoginAs(
+                            navigator = navigator,
+                            userType = UserType.ADMIN
+                        )
+                    }.background(
+                        color = if (targetState) colors.LIGHT_GRAY.asColor() else colors.MAT_WHITE.asColor()
+                    ).padding(top = 30.dp, bottom = 30.dp).fillMaxWidth()
                 ) {
                     Text(
                         text = strings.login_as_admin,
                         modifier = Modifier,
                         textAlign = TextAlign.Center,
                         style = TextStyle(
-                            color = colors.MAT_DARK.asColor(),
+                            color = colors.MAT_WHITE.asColor(),
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 18.sp,
                         )
@@ -127,9 +133,10 @@ class UserSelectionScreen : Screen {
                 }
             }
 
+            Spacer(modifier = Modifier.height(10.dp))
+
             AnimatedContent(
-                modifier = Modifier.fillMaxWidth()
-                    .weight(userSectionWeight),
+                modifier = Modifier.wrapContentHeight().fillMaxWidth(),
                 targetState = tileTwo,
                 transitionSpec = {
                     slideInHorizontally(
@@ -148,28 +155,29 @@ class UserSelectionScreen : Screen {
             ) { targetState ->
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.background(
-                        color = if (targetState) colors.PRIMARY_ORANGE_LIGHT.asColor() else colors.MAT_WHITE.asColor()
+                    modifier = Modifier.clickable {
+                        navigateToLoginAs(
+                            navigator = navigator,
+                            userType = UserType.USER
+                        )
+                    }.background(
+                        color = if (targetState) colors.LIGHT_GRAY_TRANSPARENT.asColor() else colors.MAT_WHITE.asColor()
 
-                    ).clickable {
-                            navigateToLoginAs(
-                                navigator = navigator,
-                                userType = UserType.USER
-                            )
-                        }
+                    ).padding(top = 30.dp, bottom = 30.dp)
                 ) {
                     Text(
                         text = strings.login_as_user,
                         modifier = Modifier,
                         textAlign = TextAlign.Center,
                         style = TextStyle(
-                            color = colors.MAT_DARK.asColor(),
+                            color = colors.MAT_WHITE.asColor(),
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 18.sp,
                         )
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(50.dp))
 
 
         }

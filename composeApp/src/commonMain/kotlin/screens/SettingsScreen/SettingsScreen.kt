@@ -109,79 +109,16 @@ class SettingsScreen : Screen {
             }
         }
 
-        Column(
-            modifier = Modifier.fillMaxSize().animateContentSize()
-                .verticalScroll(state = rememberScrollState(), enabled = true),
-        ) {
+        if (isAdmin){
+            Column(
+                modifier = Modifier.fillMaxSize().animateContentSize()
+                    .verticalScroll(state = rememberScrollState(), enabled = true),
+            ) {
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            AnimatedContent(
-                targetState = tileOne,
-                transitionSpec = {
-                    slideInHorizontally(
-                        animationSpec = spring(
-                            stiffness = Spring.StiffnessLow,
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            visibilityThreshold = IntOffset.VisibilityThreshold
-                        ),
-                        initialOffsetX = { fullWidth -> fullWidth }
-                    ) togetherWith
-                            slideOutHorizontally(
-                                animationSpec = tween(200),
-                                targetOffsetX = { fullWidth -> -fullWidth }
-                            )
-                }
-            ) { targetState ->
-                PlainTextTile(
-                    modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
-                    textColor = colors.MAT_WHITE.asColor(),
-                    text = "Add User",
-                    onClick = {
-                        showAddUserDialog = true
-                    }
-                )
-            }
-
-
-            Spacer(modifier = Modifier.height(1.dp))
-
-
-            AnimatedContent(
-                targetState = tileTwo,
-                transitionSpec = {
-                    slideInHorizontally(
-                        animationSpec = spring(
-                            stiffness = Spring.StiffnessLow,
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            visibilityThreshold = IntOffset.VisibilityThreshold
-                        ),
-                        initialOffsetX = { fullWidth -> fullWidth }
-                    ) togetherWith
-                            slideOutHorizontally(
-                                animationSpec = tween(200),
-                                targetOffsetX = { fullWidth -> -fullWidth }
-                            )
-                }
-            ) { targetState ->
-                PlainTextTile(
-                    modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
-                    textColor = colors.MAT_WHITE.asColor(),
-                    text = "Add Project",
-                    onClick = {
-                        showAddProjectDialog = true
-                    }
-                )
-            }
-
-
-            Spacer(modifier = Modifier.height(1.dp))
-
-
-            if (haveSpecialRights) {
+                Spacer(modifier = Modifier.weight(1f))
 
                 AnimatedContent(
-                    targetState = tileThree,
+                    targetState = tileOne,
                     transitionSpec = {
                         slideInHorizontally(
                             animationSpec = spring(
@@ -200,9 +137,9 @@ class SettingsScreen : Screen {
                     PlainTextTile(
                         modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
                         textColor = colors.MAT_WHITE.asColor(),
-                        text = "Add Admin",
+                        text = "Add User",
                         onClick = {
-                            showAddAdminDialog = true
+                            showAddUserDialog = true
                         }
                     )
                 }
@@ -210,47 +147,158 @@ class SettingsScreen : Screen {
 
                 Spacer(modifier = Modifier.height(1.dp))
 
-            }
 
-
-            AnimatedContent(
-                targetState = tileFour,
-                transitionSpec = {
-                    slideInHorizontally(
-                        animationSpec = spring(
-                            stiffness = Spring.StiffnessLow,
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            visibilityThreshold = IntOffset.VisibilityThreshold
-                        ),
-                        initialOffsetX = { fullWidth -> fullWidth }
-                    ) togetherWith
-                            slideOutHorizontally(
-                                animationSpec = tween(200),
-                                targetOffsetX = { fullWidth -> -fullWidth }
-                            )
-                }
-            ) { targetState ->
-                PlainTextTile(
-                    modifier = Modifier.background(color = if (targetState) colors.RED.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
-                    textColor = colors.MAT_WHITE.asColor(),
-                    text = "Sign Out",
-                    onClick = {
-                        coroutineScope.launch {
-                            isLoading = true
-                            val isSignedOut = signOut()
-                            if (isSignedOut) {
-                                tabNavigator.parent?.replaceAll(UserSelectionScreen())
-                            }
-                            isLoading = false
-                        }
-
+                AnimatedContent(
+                    targetState = tileTwo,
+                    transitionSpec = {
+                        slideInHorizontally(
+                            animationSpec = spring(
+                                stiffness = Spring.StiffnessLow,
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                visibilityThreshold = IntOffset.VisibilityThreshold
+                            ),
+                            initialOffsetX = { fullWidth -> fullWidth }
+                        ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = tween(200),
+                                    targetOffsetX = { fullWidth -> -fullWidth }
+                                )
                     }
-                )
+                ) { targetState ->
+                    PlainTextTile(
+                        modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
+                        textColor = colors.MAT_WHITE.asColor(),
+                        text = "Add Project",
+                        onClick = {
+                            showAddProjectDialog = true
+                        }
+                    )
+                }
+
+
+                Spacer(modifier = Modifier.height(1.dp))
+
+
+                if (haveSpecialRights) {
+
+                    AnimatedContent(
+                        targetState = tileThree,
+                        transitionSpec = {
+                            slideInHorizontally(
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessLow,
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    visibilityThreshold = IntOffset.VisibilityThreshold
+                                ),
+                                initialOffsetX = { fullWidth -> fullWidth }
+                            ) togetherWith
+                                    slideOutHorizontally(
+                                        animationSpec = tween(200),
+                                        targetOffsetX = { fullWidth -> -fullWidth }
+                                    )
+                        }
+                    ) { targetState ->
+                        PlainTextTile(
+                            modifier = Modifier.background(color = if (targetState) colors.LIGHT_GRAY.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
+                            textColor = colors.MAT_WHITE.asColor(),
+                            text = "Add Admin",
+                            onClick = {
+                                showAddAdminDialog = true
+                            }
+                        )
+                    }
+
+
+                    Spacer(modifier = Modifier.height(1.dp))
+
+                }
+
+
+                AnimatedContent(
+                    targetState = tileFour,
+                    transitionSpec = {
+                        slideInHorizontally(
+                            animationSpec = spring(
+                                stiffness = Spring.StiffnessLow,
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                visibilityThreshold = IntOffset.VisibilityThreshold
+                            ),
+                            initialOffsetX = { fullWidth -> fullWidth }
+                        ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = tween(200),
+                                    targetOffsetX = { fullWidth -> -fullWidth }
+                                )
+                    }
+                ) { targetState ->
+                    PlainTextTile(
+                        modifier = Modifier.background(color = if (targetState) colors.RED.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
+                        textColor = colors.MAT_WHITE.asColor(),
+                        text = "Sign Out",
+                        onClick = {
+                            coroutineScope.launch {
+                                isLoading = true
+                                val isSignedOut = signOut()
+                                if (isSignedOut) {
+                                    tabNavigator.parent?.replaceAll(UserSelectionScreen())
+                                }
+                                isLoading = false
+                            }
+
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(50.dp).background(color = colors.LIGHT_GRAY.asColor()))
+
             }
+        }else{
+            Column(
+                modifier = Modifier.fillMaxSize().animateContentSize()
+                    .verticalScroll(state = rememberScrollState(), enabled = true),
+            ){
+                Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.height(50.dp).background(color = colors.LIGHT_GRAY.asColor()))
+                AnimatedContent(
+                    targetState = tileOne,
+                    transitionSpec = {
+                        slideInHorizontally(
+                            animationSpec = spring(
+                                stiffness = Spring.StiffnessLow,
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                visibilityThreshold = IntOffset.VisibilityThreshold
+                            ),
+                            initialOffsetX = { fullWidth -> fullWidth }
+                        ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = tween(200),
+                                    targetOffsetX = { fullWidth -> -fullWidth }
+                                )
+                    }
+                ) { targetState ->
+                    PlainTextTile(
+                        modifier = Modifier.background(color = if (targetState) colors.RED.asColor() else Color.Transparent).padding(top = 50.dp, bottom = 50.dp),
+                        textColor = colors.MAT_WHITE.asColor(),
+                        text = "Sign Out",
+                        onClick = {
+                            coroutineScope.launch {
+                                isLoading = true
+                                val isSignedOut = signOut()
+                                if (isSignedOut) {
+                                    tabNavigator.parent?.replaceAll(UserSelectionScreen())
+                                }
+                                isLoading = false
+                            }
 
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(50.dp).background(color = colors.LIGHT_GRAY.asColor()))
+
+            }
         }
+
 
 
 

@@ -38,6 +38,6 @@ class SplashScreen : Screen {
                 navigator.push(UserSelectionScreen())
             }
         }
-        Box(modifier = Modifier.fillMaxSize().background(color = YELLOW_LIGHT.asColor()))
+        Box(modifier = Modifier.fillMaxSize().background(color = colors.EXTRA_LIGHT_GRAY.asColor()))
     }
 }
