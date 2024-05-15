@@ -30,6 +30,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import colors.asColor
 import repository.CommonRepository
 import repository.models.data.ObjUser
+import screens.addReleaseScreen.AddReleaseScreen
 
 
 @Composable
@@ -50,11 +51,15 @@ fun UserHomeScreen(user: ObjUser?) {
         defaultClosed = true
     )
 
-    Box(modifier = Modifier.padding(bottom = 70.dp, end = 15.dp).fillMaxSize(),
-        contentAlignment = Alignment.BottomEnd) {
+    Box(
+        modifier = Modifier
+            .padding(bottom = 70.dp, end = 15.dp)
+            .fillMaxSize(),
+        contentAlignment = Alignment.BottomEnd
+    ) {
         Icon(
             modifier = Modifier.clickable {
-
+                tabNavigator.parent?.push(AddReleaseScreen())
             }.size(80.dp).padding(0.dp),
             imageVector = Icons.Filled.AddCircle,
             contentDescription = null,
