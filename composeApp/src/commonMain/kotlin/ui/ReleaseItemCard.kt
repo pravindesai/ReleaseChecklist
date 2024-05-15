@@ -60,12 +60,18 @@ import repository.models.data.ObjDocument
 fun ReleaseItemsList(
     modifier: Modifier = Modifier,
     listOfReleases: List<ObjDocument>,
+    defaultClosed:Boolean = false,
     onCardClick: (objDoc: ObjDocument) -> Unit = {},
     onDeleteClick: (objDoc: ObjDocument) -> Unit = {}
 ) {
     var listOfReleasesState by remember { mutableStateOf(listOfReleases) }
     LaunchedEffect(listOfReleases) {
-        listOfReleasesState = listOfReleases
+        listOfReleasesState = listOfReleases.map {
+            if (defaultClosed){
+                it.isExpanded = false
+            }
+            it
+        }
     }
     LazyColumn(
         state = rememberLazyListState(),
@@ -235,7 +241,7 @@ fun RowTableTitleHeader(
             modifier = Modifier
                 .background(if (targetState) MAT_DARK.asColor() else Color.Transparent)
                 .padding(1.dp)
-                .background(Color.White)
+                .background(if (targetState)  Color.White else Color.Transparent)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(6.dp).clickable {
@@ -304,7 +310,7 @@ fun RowOfTable(position:Int = 0, key: String, value: String, isWarning: Boolean?
             modifier = Modifier
                 .background(color = if (targetState) colors.MAT_DARK_LIGHT.asColor() else Color.Transparent)
                 .padding(start = (0.5).dp, end = (0.5).dp, bottom = (0.5).dp)
-                .background(Color.White)
+                .background(if (targetState)  Color.White else Color.Transparent)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(6.dp)

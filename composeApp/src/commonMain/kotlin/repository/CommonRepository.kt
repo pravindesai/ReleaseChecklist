@@ -111,7 +111,10 @@ object CommonRepository {
         }
         when(user){
             is ObjAdmin -> currentAdmin = user
-            is ObjUser -> currentUser = user
+            is ObjUser -> {
+                currentUser = user
+                currentUserAdminId = currentUser?.fields?.adminId?.stringValue?:currentUser?.fields?.adminid?.stringValue
+            }
         }
     }
 

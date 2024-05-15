@@ -37,6 +37,7 @@ import ui.AdminListViewType
 import ui.AppAlertDialog
 import ui.AppProgressBar
 import ui.ReleaseItemsList
+import ui.ReleasesList
 import ui.ScreenHeaderWithTitle
 
 
@@ -48,137 +49,10 @@ class ReleaseListScreen(
 
     @Composable
     override fun Content() {
-        val coroutineScope = rememberCoroutineScope()
-        val tabNavigator = LocalNavigator.currentOrThrow
-        var isLoading by remember { mutableStateOf(false) }
-
-        var releasesListState by remember { mutableStateOf(listOf<ObjDocument>()) }
-        val viewTypeState by remember { mutableStateOf(viewType) }
-        var showFailureDialog by remember { mutableStateOf(Pair(false, "")) }
-
-        LaunchedEffect(key1 = viewTypeState) {
-            when (viewTypeState) {
-                AdminListViewType.Users -> {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        isLoading = true
-                        val result = objUser?.let { getAllReleasesForUser(objUser.fields?.userId?.stringValue?:objUser.fields?.userid?.stringValue?:"") }
-
-                        if (result?.success == true) {
-                            val list = result.data ?: emptyList()
-                            releasesListState = list
-                        } else {
-                            releasesListState = emptyList()
-                            showFailureDialog = Pair(true, result?.message ?: "FAILED")
-                        }
-                        isLoading = false
-                    }
-                }
-
-                AdminListViewType.Projects -> {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        isLoading = true
-                        val result = objDocument?.let { getAllReleasesForProject(objDocument = it) }
-
-                        if (result?.success == true) {
-                            val list = result.data ?: emptyList()
-                            releasesListState = list
-                        } else {
-                            releasesListState = emptyList()
-                            showFailureDialog = Pair(true, result?.message ?: "FAILED")
-                        }
-                        isLoading = false
-                    }
-                }
-
-                AdminListViewType.Releases -> {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        isLoading = true
-                        val result = objDocument?.let { getAllReleasesForAdmin() }
-
-                        if (result?.success == true) {
-                            val list = result.data ?: emptyList()
-                            releasesListState = list
-                        } else {
-                            releasesListState = emptyList()
-                            showFailureDialog = Pair(true, result?.message ?: "FAILED")
-                        }
-                        isLoading = false
-                    }
-                }
-            }
-        }
-
-        //UI
-
-        Column(modifier = Modifier.fillMaxSize()) {
-            ScreenHeaderWithTitle(title = when (viewTypeState) {
-                AdminListViewType.Users -> "Releases by ${objUser?.fields?.userId?.stringValue ?: objUser?.fields?.userid?.stringValue ?: ""}"
-                AdminListViewType.Projects -> "Release for ${objDocument?.fields?.projectName?.stringValue ?: ""}"
-                AdminListViewType.Releases -> "Recent Releases"
-            }, onBackClick = {
-                tabNavigator.pop()
-            })
-
-            Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
-
-                if (releasesListState.isNotEmpty() or isLoading){
-                    ReleaseItemsList(
-                        listOfReleases = releasesListState,
-                        onCardClick = { doc ->
-
-                        },
-                        onDeleteClick = { doc ->
-
-                        }
-                    )
-                }else{
-
-                    Box(modifier = Modifier.fillMaxSize().background(colors.PLAIN_WHITE .asColor()),
-                        contentAlignment = Alignment.Center){
-                        AsyncImage(
-                            model = CommonRepository.NO_DATA_FOUND_PLACEHOLDER,
-                            contentDescription = null
-                        )
-
-                    }
-
-
-                }
-
-
-            }
-
-        }
-
-        if (isLoading) {
-            AppProgressBar()
-        }
-
-        if (showFailureDialog.first) {
-            Box(
-                modifier = Modifier.fillMaxSize().clickable {
-                    showFailureDialog = Pair(false, "")
-                },
-                contentAlignment = Alignment.Center
-            ) {
-                AppAlertDialog(
-                    modifier = Modifier.wrapContentSize(),
-                    dialogTitle = "Alert",
-                    showNegativeButton = true,
-                    showPositiveButton = false,
-                    dialogText = showFailureDialog.second,
-                    onDismissRequest = {
-                        showFailureDialog = Pair(false, "")
-                        tabNavigator.pop()
-                    },
-                    onConfirmation = {
-                        showFailureDialog = Pair(false, "")
-                    })
-            }
-        }
-
+        ReleasesList(
+            viewType = viewType, objUser = objUser, objDocument = objDocument
+        )
     }
-
 }
 
 suspend fun getAllReleasesForProject(objDocument: ObjDocument): ApiResult<List<ObjDocument>> {
@@ -190,7 +64,7 @@ suspend fun getAllReleasesForAdmin(): ApiResult<List<ObjDocument>> {
     return CommonRepository.getAllReleasesForAdmin()
 }
 
-suspend fun getAllReleasesForUser(userId:String): ApiResult<List<ObjDocument>> {
+suspend fun getAllReleasesForUser(userId: String): ApiResult<List<ObjDocument>> {
     return CommonRepository.getAllReleasesForUser(userId)
 }
 

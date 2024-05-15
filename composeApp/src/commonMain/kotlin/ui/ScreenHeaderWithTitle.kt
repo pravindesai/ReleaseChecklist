@@ -22,6 +22,7 @@ import colors.asColor
 fun ScreenHeaderWithTitle(
     modifier: Modifier = Modifier,
     title: String,
+    showBackButton: Boolean = true,
     onBackClick: () -> Unit = {}
 ) {
     Row(
@@ -30,12 +31,14 @@ fun ScreenHeaderWithTitle(
             .wrapContentHeight()
             .padding(10.dp)
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = "",
-                tint = colors.MAT_DARK.asColor()
-            )
+        if (showBackButton){
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "",
+                    tint = colors.MAT_DARK.asColor()
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(15.dp))
