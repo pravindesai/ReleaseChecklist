@@ -45,6 +45,7 @@ import ui.AppProgressBar
 import ui.ScreenHeaderWithTitle
 import ui.form_items.ComposableEdittext
 import ui.form_items.ComposableRadioGroup
+import ui.form_items.DateTimeComposable
 import ui.form_items.Dropdown
 
 class AddReleaseScreen : Screen {
@@ -146,10 +147,10 @@ class AddReleaseScreen : Screen {
                             isEnabled = true,
                             dropdownItems = listOfProjects.map { it.fields?.projectName?.stringValue?:"" },
                             onItemsSelected = {
-                                projectName = it?.let { index -> listOfProjects.getOrNull(index)?.fields?.projectName?.stringValue } ?: projectName
                             },
                             onDoneClick = {
                                 coroutineScope.launch {
+                                    projectName = it?.let { index -> listOfProjects.getOrNull(index)?.fields?.projectName?.stringValue } ?: projectName
                                     modalSheetState.hide()
                                 }
                             },
@@ -204,21 +205,17 @@ class AddReleaseScreen : Screen {
                             }
                         )
                         Spacer(modifier = Modifier.height(5.dp))
-                        ComposableEdittext(
+
+                        DateTimeComposable(
                             title = "Release Date and Time",
-                            placeholder = "",
-                            text = releaseDateTime,
-                            isRequired = true,
-                            focusManager = focusManager,
-                            focusRequester = focusRequester,
+                            dateTimeString = releaseDateTime,
                             isEnabled = true,
-                            isClickable = true,
-                            maxCharCount = 100,
-                            singleLine = true,
-                            onTextChanged = { text, _ ->
-                                releaseDateTime = text
+                            isRequired = true,
+                            onDateTimeSelected = {
+                                releaseDateTime =  it
                             }
-                        )
+                            )
+
                         Spacer(modifier = Modifier.height(5.dp))
                         ComposableEdittext(
                             title = "Tag",
