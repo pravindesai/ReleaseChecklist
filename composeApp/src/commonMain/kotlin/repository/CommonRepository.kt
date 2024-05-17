@@ -344,7 +344,6 @@ object CommonRepository {
         }
     }
 
-
     suspend fun addProject(projectName: String): ApiResult<ObjDocument> {
         return try {
 
@@ -438,20 +437,48 @@ object CommonRepository {
 
     }
 
+    suspend fun addRelease(releases: ObjDocument): ApiResult<ObjDocument> {
+        return try {
 
-    suspend fun removeProject(projectId: String): Boolean {
-        delay(2.seconds)
-        return true
-    }
+            val httpResponse = client.post(
+                        PROJECT
+                        .plus("/${releases.fields?.projectId?.stringValue}/")
+                        .plus(RELEASES)) {
+                contentType(ContentType.Application.Json)
+                url {
+                    parameters.append("documentId", releases.fields?.releaseId?.stringValue?:"")
+                }
+                setBody(
+                    AddAdminPayload(
+                        fields = releases.fields
+                    )
+                )
+            }
+            logHttpResponse(httpResponse)
 
-    suspend fun addRelease(releases: Any): Boolean {
-        delay(2.seconds)
-        return true
-    }
+            if (httpResponse.status == HttpStatusCode.OK) {
+                val user = httpResponse.body<ObjDocument?>()
+                ApiResult(
+                    success = true,
+                    data = user,
+                    message = httpResponse.body<String>()
+                )
+            } else {
+                ApiResult(
+                    success = false,
+                    data = null,
+                    message = httpResponse.body<String>()
+                )
+            }
 
-    suspend fun removeRelease(releaseId: String): Boolean {
-        delay(2.seconds)
-        return true
+        } catch (e: Exception) {
+            println("*** " + e.message)
+            ApiResult(
+                success = false,
+                data = null,
+                message = e.message
+            )
+        }
     }
 
     private suspend fun logHttpResponse(httpResponse: HttpResponse) {
@@ -620,8 +647,6 @@ object CommonRepository {
             message = ""
         )
     }
-
-
 
     suspend fun getAllReleasesForUser(userId: String): ApiResult<List<ObjDocument>> {
 

@@ -2,6 +2,7 @@ package screens.addReleaseScreen
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -27,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
@@ -37,12 +40,21 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import colors.asColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import repository.CommonRepository
+import repository.models.BooleanValue
+import repository.models.Fields
+import repository.models.StringValue
 import repository.models.data.ObjDocument
 import repository.models.data.ObjUser
+import ui.AppAlertDialog
 import ui.AppProgressBar
 import ui.ScreenHeaderWithTitle
+import ui.deleteProject
+import ui.deleteRelease
+import ui.deleteUser
 import ui.form_items.ComposableEdittext
 import ui.form_items.ComposableRadioGroup
 import ui.form_items.DateTimeComposable
@@ -58,6 +70,8 @@ class AddReleaseScreen : Screen {
         val focusRequester by remember { mutableStateOf(FocusRequester()) }
         val focusManager = LocalFocusManager.current
         var isLoading by remember { mutableStateOf(false) }
+
+        var dialogShowMsgNavigateback by remember { mutableStateOf(Triple(false, "", false)) }
 
         var dialogLayout by remember {
             mutableStateOf<((@Composable () -> Unit))>({
@@ -80,12 +94,16 @@ class AddReleaseScreen : Screen {
         var version by remember { mutableStateOf("") }
         var releaseDateTime by remember { mutableStateOf("") }
         var tag by remember { mutableStateOf("") }
-        val userId by remember { derivedStateOf {
-            currentUser.fields?.userId?.stringValue ?: currentUser.fields?.userid?.stringValue
-        } }
-        val adminId by remember { derivedStateOf {
-            currentUser.fields?.adminId?.stringValue ?: currentUser.fields?.adminid?.stringValue
-        } }
+        val userId by remember {
+            derivedStateOf {
+                currentUser.fields?.userId?.stringValue ?: currentUser.fields?.userid?.stringValue
+            }
+        }
+        val adminId by remember {
+            derivedStateOf {
+                currentUser.fields?.adminId?.stringValue ?: currentUser.fields?.adminid?.stringValue
+            }
+        }
         var controlCenterIDChecked by remember { mutableStateOf(false) }
         var controlCenterLogChecked by remember { mutableStateOf(false) }
 
@@ -97,10 +115,12 @@ class AddReleaseScreen : Screen {
             skipHalfExpanded = false,
         )
 
-        LaunchedEffect(listOfProjects){
+        LaunchedEffect(listOfProjects) {
             coroutineScope.launch {
                 isLoading = true
-                val projectListResult = CommonRepository.getAllProjectForAdmin(CommonRepository.getCurrentAdminId()?:"")
+                val projectListResult = CommonRepository.getAllProjectForAdmin(
+                    CommonRepository.getCurrentAdminId() ?: ""
+                )
                 if ((projectListResult?.success == true).not()) {
                     isLoading = false
                     val erroMsg = projectListResult?.message ?: "FAILED"
@@ -133,11 +153,13 @@ class AddReleaseScreen : Screen {
                         }
                     )
 
-                    Column(modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .background(color = Color.White)
-                        .verticalScroll(state = ScrollState(0))) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .background(color = Color.White)
+                            .verticalScroll(state = ScrollState(0))
+                    ) {
 
                         Spacer(modifier = Modifier.height(50.dp))
 
@@ -145,12 +167,16 @@ class AddReleaseScreen : Screen {
                             title = "Select Project",
                             isRequired = true,
                             isEnabled = true,
-                            dropdownItems = listOfProjects.map { it.fields?.projectName?.stringValue?:"" },
+                            dropdownItems = listOfProjects.map {
+                                it.fields?.projectName?.stringValue ?: ""
+                            },
                             onItemsSelected = {
                             },
                             onDoneClick = {
                                 coroutineScope.launch {
-                                    projectName = it?.let { index -> listOfProjects.getOrNull(index)?.fields?.projectName?.stringValue } ?: projectName
+                                    projectName =
+                                        it?.let { index -> listOfProjects.getOrNull(index)?.fields?.projectName?.stringValue }
+                                            ?: projectName
                                     modalSheetState.hide()
                                 }
                             },
@@ -212,9 +238,9 @@ class AddReleaseScreen : Screen {
                             isEnabled = true,
                             isRequired = true,
                             onDateTimeSelected = {
-                                releaseDateTime =  it
+                                releaseDateTime = it
                             }
-                            )
+                        )
 
                         Spacer(modifier = Modifier.height(5.dp))
                         ComposableEdittext(
@@ -273,6 +299,35 @@ class AddReleaseScreen : Screen {
                             colors = ButtonDefaults.buttonColors(colors.MAT_DARK.asColor()),
                             onClick = {
 
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    isLoading = true
+
+                                    val apiResult = CommonRepository.addRelease(
+                                        releases = ObjDocument(
+                                            fields = Fields(
+                                                projectName = StringValue(projectName),
+                                                branchName = StringValue(branchName),
+                                                projectId = StringValue(projectName),
+                                                releaseId = StringValue(version),
+                                                releaseDateTimeEpoch = StringValue(releaseDateTime),
+                                                tag = StringValue(tag),
+                                                baseCampIDChecked = BooleanValue(controlCenterIDChecked),
+                                                baseCampLogCheked = BooleanValue(controlCenterLogChecked),
+                                                userId = StringValue(userId),
+                                                adminId = StringValue(adminId)
+                                            ),
+                                        )
+                                    )
+
+                                    dialogShowMsgNavigateback = Triple(
+                                        first = true,
+                                        second = if (apiResult.success==true) "Release is uploaded successfully." else "Something went wrong.\nPlease verify your internet connection and if release with same version is already not uploaded.",
+                                        third = apiResult.success==true
+                                    )
+
+                                    isLoading = false
+                                }
+
                                 println("#**projectName --> ${projectName}")
                                 println("#**branchName --> ${branchName}")
                                 println("#**version --> ${version}")
@@ -300,8 +355,33 @@ class AddReleaseScreen : Screen {
             }
         )
 
-        if (isLoading){
+        if (isLoading) {
             AppProgressBar()
+        }
+
+        if (dialogShowMsgNavigateback.first) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                AppAlertDialog(
+                    modifier = Modifier.wrapContentSize(),
+                    dialogTitle = "Alert",
+                    dialogText = dialogShowMsgNavigateback.second,
+                    showNegativeButton = false,
+                    showPositiveButton = true,
+                    positiveButtonText = "OK",
+                    onDismissRequest = {
+                        dialogShowMsgNavigateback = Triple(first = false, second = "", third = false)
+                        navigator.pop()
+                    },
+                    onConfirmation = {
+                        if (dialogShowMsgNavigateback.third){
+                            navigator.pop()
+                        }
+                        dialogShowMsgNavigateback = Triple(first = false, second = "", third = false)
+                    })
+            }
         }
 
     }
