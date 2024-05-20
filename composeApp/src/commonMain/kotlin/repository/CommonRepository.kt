@@ -185,7 +185,7 @@ object CommonRepository {
     }
 
     suspend fun signOut(): Boolean {
-        delay(2.seconds)
+        delay(500)
         setCurrentUser(null)
         return true
     }
