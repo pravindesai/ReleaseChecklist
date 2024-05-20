@@ -288,7 +288,7 @@ fun RowTableTitleHeader(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Icon(
                     modifier = Modifier.size(24.dp).rotate(if (objDocState.isExpanded) 0f else 180f)
                         .clickable {
