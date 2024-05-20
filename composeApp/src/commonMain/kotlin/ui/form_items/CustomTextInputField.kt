@@ -41,7 +41,6 @@ import colors.asColor
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CustomTextInputField(
     modifier: Modifier = Modifier,
@@ -56,6 +55,7 @@ fun CustomTextInputField(
     placeholder: String = "",
     minLines: Int = 1,
     allowAutoComplete: Boolean = false,
+    keyboardOptions:KeyboardOptions? = null,
     autoCompleteList: List<String> = emptyList<String>(),
     singleLine: Boolean = true,
     onTextChanged: (updatedText: String, isTextSelectedFromAutoSearch: Boolean) -> Unit = { _, _ -> },
@@ -73,7 +73,7 @@ fun CustomTextInputField(
     var isValueChanged by remember { mutableStateOf(false) }
     val keyboardOptions by remember {
         mutableStateOf(
-            getKeyboardOption(
+            keyboardOptions?:getKeyboardOption(
                 fieldType = viewType,
                 patternType = patternType
             )

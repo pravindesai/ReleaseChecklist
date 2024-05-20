@@ -27,6 +27,7 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import colors.asColor
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ui.TimePickerDialog
@@ -62,11 +64,19 @@ fun DateTimeComposable(
 ) {
 
 
-    var datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(Clock.System.now().toEpochMilliseconds())
     var showDatePicker by remember { mutableStateOf(false) }
 
-    var timePickerState = rememberTimePickerState()
+    val currentTime by remember { mutableStateOf(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())) }
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.hour,
+        initialMinute = currentTime.minute,
+        is24Hour = false
+    )
+
     var showTimePicker by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = modifier

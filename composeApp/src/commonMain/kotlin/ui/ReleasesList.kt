@@ -122,12 +122,13 @@ fun ReleasesList(
             if (releasesListState.isNotEmpty() or isLoading) {
                 ReleaseItemsList(
                     listOfReleases = releasesListState,
+                    isDeleteAllowed = false,
                     defaultClosed = defaultClosed,
                     onCardClick = { doc ->
 
                     },
                     onDeleteClick = { doc ->
-
+                        //delete
                     }
                 )
             } else {

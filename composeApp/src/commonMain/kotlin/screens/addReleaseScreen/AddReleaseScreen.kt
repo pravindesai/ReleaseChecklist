@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -59,6 +60,7 @@ import ui.form_items.ComposableEdittext
 import ui.form_items.ComposableRadioGroup
 import ui.form_items.DateTimeComposable
 import ui.form_items.Dropdown
+import ui.form_items.getKeyboardOption
 
 class AddReleaseScreen : Screen {
 
@@ -107,7 +109,6 @@ class AddReleaseScreen : Screen {
         var controlCenterIDChecked by remember { mutableStateOf(false) }
         var controlCenterLogChecked by remember { mutableStateOf(false) }
 
-        var failureDialog by remember { mutableStateOf(Pair(false, "")) }
 
         val modalSheetState = rememberModalBottomSheetState(
             initialValue = ModalBottomSheetValue.Hidden,
@@ -124,7 +125,7 @@ class AddReleaseScreen : Screen {
                 if ((projectListResult?.success == true).not()) {
                     isLoading = false
                     val erroMsg = projectListResult?.message ?: "FAILED"
-                    failureDialog = Pair(true, erroMsg)
+                    dialogShowMsgNavigateback = Triple(true, erroMsg, true)
                 } else {
                     isLoading = false
                     listOfProjects = projectListResult?.data ?: emptyList()
@@ -158,7 +159,7 @@ class AddReleaseScreen : Screen {
                             .fillMaxWidth()
                             .weight(1f)
                             .background(color = Color.White)
-                            .verticalScroll(state = ScrollState(0))
+                            .verticalScroll(state = rememberScrollState())
                     ) {
 
                         Spacer(modifier = Modifier.height(50.dp))
@@ -203,6 +204,7 @@ class AddReleaseScreen : Screen {
                             title = "Branch Name",
                             placeholder = "",
                             text = branchName,
+                            keyboardOptions = getKeyboardOption(),
                             isRequired = true,
                             focusManager = focusManager,
                             focusRequester = focusRequester,
@@ -222,6 +224,7 @@ class AddReleaseScreen : Screen {
                             isRequired = true,
                             focusManager = focusManager,
                             focusRequester = focusRequester,
+                            keyboardOptions = getKeyboardOption(),
                             isEnabled = true,
                             isClickable = true,
                             maxCharCount = 100,
@@ -250,6 +253,7 @@ class AddReleaseScreen : Screen {
                             isRequired = true,
                             focusManager = focusManager,
                             focusRequester = focusRequester,
+                            keyboardOptions = getKeyboardOption(),
                             isEnabled = true,
                             isClickable = true,
                             maxCharCount = 100,
@@ -300,6 +304,18 @@ class AddReleaseScreen : Screen {
                             onClick = {
 
                                 coroutineScope.launch(Dispatchers.IO) {
+
+                                    if (
+                                        projectName.isBlank() || branchName.isBlank() || version.isBlank() || releaseDateTime.isBlank() || tag.isBlank() || userId.isNullOrBlank() || adminId.isNullOrBlank()
+                                    ){
+                                        dialogShowMsgNavigateback = Triple(
+                                            first = true,
+                                            second = "Please fill all the required fileds.",
+                                            third = false
+                                        )
+                                        return@launch
+                                    }
+
                                     isLoading = true
 
                                     val apiResult = CommonRepository.addRelease(
@@ -311,8 +327,12 @@ class AddReleaseScreen : Screen {
                                                 releaseId = StringValue(version),
                                                 releaseDateTimeEpoch = StringValue(releaseDateTime),
                                                 tag = StringValue(tag),
-                                                baseCampIDChecked = BooleanValue(controlCenterIDChecked),
-                                                baseCampLogCheked = BooleanValue(controlCenterLogChecked),
+                                                baseCampIDChecked = BooleanValue(
+                                                    controlCenterIDChecked
+                                                ),
+                                                baseCampLogCheked = BooleanValue(
+                                                    controlCenterLogChecked
+                                                ),
                                                 userId = StringValue(userId),
                                                 adminId = StringValue(adminId)
                                             ),
@@ -321,8 +341,8 @@ class AddReleaseScreen : Screen {
 
                                     dialogShowMsgNavigateback = Triple(
                                         first = true,
-                                        second = if (apiResult.success==true) "Release is uploaded successfully." else "Something went wrong.\nPlease verify your internet connection and if release with same version is already not uploaded.",
-                                        third = apiResult.success==true
+                                        second = if (apiResult.success == true) "Release is uploaded successfully." else "Something went wrong.\nPlease verify your internet connection and if release with same version is already not uploaded.",
+                                        third = apiResult.success == true
                                     )
 
                                     isLoading = false
@@ -372,14 +392,16 @@ class AddReleaseScreen : Screen {
                     showPositiveButton = true,
                     positiveButtonText = "OK",
                     onDismissRequest = {
-                        dialogShowMsgNavigateback = Triple(first = false, second = "", third = false)
+                        dialogShowMsgNavigateback =
+                            Triple(first = false, second = "", third = false)
                         navigator.pop()
                     },
                     onConfirmation = {
-                        if (dialogShowMsgNavigateback.third){
+                        if (dialogShowMsgNavigateback.third) {
                             navigator.pop()
                         }
-                        dialogShowMsgNavigateback = Triple(first = false, second = "", third = false)
+                        dialogShowMsgNavigateback =
+                            Triple(first = false, second = "", third = false)
                     })
             }
         }

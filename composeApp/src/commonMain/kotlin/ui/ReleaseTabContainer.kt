@@ -23,6 +23,7 @@ fun ReleasesTabContainer(modifier: Modifier = Modifier,
     Column(modifier = modifier.fillMaxWidth()) {
         ReleaseItemsList(
             listOfReleases = releasesListState,
+            isDeleteAllowed = true,
             onCardClick = { doc ->
 
             },

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ fun ComposableEdittext(
     allowAutoComplete: Boolean = false,
     isInFocus: Boolean = false,
     autoCompleteList:List<String> = mutableListOf<String>(),
+    keyboardOptions: KeyboardOptions? = null,
     viewType: String? = null,
     patternType: String? = "Text",
     isCaseComment:Boolean=false,
@@ -79,6 +81,7 @@ fun ComposableEdittext(
             maxCharCount = maxCharCount,
             focusRequester = focusRequester,
             focusManager = focusManager,
+            keyboardOptions = keyboardOptions,
             viewType = viewType,
             patternType = patternType,
             minLines = minLines,

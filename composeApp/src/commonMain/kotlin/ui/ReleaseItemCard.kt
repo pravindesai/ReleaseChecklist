@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import colors.EXTRA_LIGHT_GRAY
 import colors.GREEN
+import colors.LIGHT_GRAY
 import colors.MAT_DARK
 import colors.MAT_DARK_LIGHT
 import colors.RED
@@ -60,6 +64,7 @@ import repository.models.data.ObjDocument
 fun ReleaseItemsList(
     modifier: Modifier = Modifier,
     listOfReleases: List<ObjDocument>,
+    isDeleteAllowed:Boolean = false,
     defaultClosed:Boolean = false,
     onCardClick: (objDoc: ObjDocument) -> Unit = {},
     onDeleteClick: (objDoc: ObjDocument) -> Unit = {}
@@ -80,6 +85,7 @@ fun ReleaseItemsList(
         items(listOfReleasesState) {
             ReleaseItem(
                 release = it,
+                isDeleteAllowed = isDeleteAllowed,
                 onCardClick = { doc ->
                     onCardClick(doc)
                 },
@@ -105,6 +111,7 @@ fun ReleaseItemsList(
 fun ReleaseItem(
     modifier: Modifier = Modifier,
     release: ObjDocument,
+    isDeleteAllowed:Boolean = false,
     onCardClick: (objDoc: ObjDocument) -> Unit = {},
     onDeleteClick: (objDoc: ObjDocument) -> Unit = {},
     onExpandClick: (objDoc: ObjDocument) -> Unit = {}
@@ -131,6 +138,10 @@ fun ReleaseItem(
             RowTableTitleHeader(
                 title = releaseState.fields?.releaseId?.stringValue ?: "",
                 objDoc = releaseState,
+                isDeleteAllowed = isDeleteAllowed,
+                onDeleteClick = {
+                    onDeleteClick(it)
+                },
                 onHeaderClicked = {
                     releaseState = releaseState.copy(isExpanded = releaseState.isExpanded.not())
                     onExpandClick(releaseState)
@@ -203,6 +214,8 @@ fun ReleaseItem(
 fun RowTableTitleHeader(
     title: String,
     objDoc: ObjDocument,
+    isDeleteAllowed:Boolean = false,
+    onDeleteClick: (objDoc: ObjDocument) -> Unit,
     onHeaderClicked: (objDoc: ObjDocument) -> Unit,
     onExpandClick: (objDoc: ObjDocument) -> Unit
 ) {
@@ -262,16 +275,31 @@ fun RowTableTitleHeader(
             )
 
 
-            Icon(
-                modifier = Modifier.size(24.dp).rotate(if (objDocState.isExpanded) 0f else 180f)
-                    .clickable {
-                        objDocState = objDocState.copy(isExpanded = objDocState.isExpanded.not())
-                        onExpandClick(objDocState)
-                    },
-                imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = "",
-                tint = if (targetState) MAT_DARK.asColor() else Color.Transparent
-            )
+            Row {
+                if (false){
+                    Icon(
+                        modifier = Modifier.size(24.dp)
+                            .clickable {
+                                onDeleteClick(objDocState)
+                            },
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "",
+                        tint = if (targetState) MAT_DARK.asColor() else Color.Transparent
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(5.dp))
+                Icon(
+                    modifier = Modifier.size(24.dp).rotate(if (objDocState.isExpanded) 0f else 180f)
+                        .clickable {
+                            objDocState = objDocState.copy(isExpanded = objDocState.isExpanded.not())
+                            onExpandClick(objDocState)
+                        },
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = "",
+                    tint = if (targetState) MAT_DARK.asColor() else Color.Transparent
+                )
+            }
         }
     }
 
