@@ -23,6 +23,7 @@ import colors.PLAIN_WHITE
 import colors.asColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import repository.CommonRepository
 import repository.CommonRepository.getAllReleasesForAdmin
@@ -30,6 +31,7 @@ import repository.CommonRepository.getAllReleasesForProject
 import repository.CommonRepository.getAllReleasesForUser
 import repository.models.data.ObjDocument
 import repository.models.data.ObjUser
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun ReleasesList(
@@ -46,6 +48,9 @@ fun ReleasesList(
     var releasesListState by remember { mutableStateOf(listOf<ObjDocument>()) }
     val viewTypeState by remember { mutableStateOf(viewType) }
     var showFailureDialog by remember { mutableStateOf(Pair(false, "")) }
+    var deleteReleaseDialog by remember { mutableStateOf(Pair<Boolean, ObjDocument?>(false, null)) }
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = viewTypeState) {
         when (viewTypeState) {
@@ -104,8 +109,6 @@ fun ReleasesList(
         }
     }
 
-    //UI
-
     Column(modifier = Modifier.fillMaxSize()) {
         ScreenHeaderWithTitle(
             showBackButton = showBackButton,
@@ -122,13 +125,13 @@ fun ReleasesList(
             if (releasesListState.isNotEmpty() or isLoading) {
                 ReleaseItemsList(
                     listOfReleases = releasesListState,
-                    isDeleteAllowed = false,
+                    isDeleteAllowed = (CommonRepository.isCurrentUserAdmin()),
                     defaultClosed = defaultClosed,
                     onCardClick = { doc ->
 
                     },
                     onDeleteClick = { doc ->
-                        //delete
+                        deleteReleaseDialog = Pair(true, doc)
                     }
                 )
             } else {
@@ -152,10 +155,6 @@ fun ReleasesList(
 
     }
 
-    if (isLoading) {
-        AppProgressBar()
-    }
-
     if (showFailureDialog.first) {
         Box(
             modifier = Modifier.fillMaxSize().clickable {
@@ -175,6 +174,70 @@ fun ReleasesList(
                 },
                 onConfirmation = {
                     showFailureDialog = Pair(false, "")
+                })
+        }
+    }
+
+    if (deleteReleaseDialog.first){
+        Box(
+            modifier = Modifier.fillMaxSize().clickable {
+                deleteReleaseDialog = Pair(false, null)
+            },
+            contentAlignment = Alignment.Center
+        ) {
+            AppAlertDialog(
+                modifier = Modifier.wrapContentSize(),
+                showPositiveButton = true,
+                showNegativeButton = true,
+                positiveButtonText = "Yes, Delete it.",
+                negativeButtonText = "No",
+                dialogTitle = "Alert",
+                dialogText = "Are you sure you want to delete ${deleteReleaseDialog.second?.fields?.releaseId?.stringValue} ?",
+                onDismissRequest = {
+                    deleteReleaseDialog = Pair(false, null)
+                },
+                onConfirmation = {
+                    isLoading = true
+                    coroutineScope.launch {
+
+                        val result = deleteReleaseDialog.second?.let { deleteRelease(it) }
+
+                        if (result?.success == true) {
+                            releasesListState =  releasesListState.filterNot { it == deleteReleaseDialog.second }
+                            dialogMessage = "Release deleted successfully."
+                            showDialog = true
+                        } else {
+                            dialogMessage = result?.message ?: "Failed to delete release.\nPlease try again"
+                            showDialog = true
+                        }
+                        deleteReleaseDialog = Pair(false, null)
+                        isLoading = false
+                    }
+                })
+        }
+    }
+
+    if (isLoading){
+        AppProgressBar()
+    }
+
+    if (showDialog) {
+        Box(
+            modifier = Modifier.fillMaxSize().clickable {
+                showDialog = false
+            },
+            contentAlignment = Alignment.Center
+        ) {
+            AppAlertDialog(
+                modifier = Modifier.wrapContentSize(),
+                showPositiveButton = false,
+                dialogTitle = "Alert",
+                dialogText = dialogMessage,
+                onDismissRequest = {
+                    showDialog = false
+                },
+                onConfirmation = {
+                    showDialog = false
                 })
         }
     }

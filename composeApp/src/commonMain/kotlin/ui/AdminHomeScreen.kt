@@ -272,7 +272,7 @@ fun AdminHomeScreen(admin: ObjAdmin?) {
                                 if (result?.success == true) {
                                     releasesList =
                                         releasesList.filterNot { it == deleteRelease.second }
-                                    dialogMessage = "Project deleted successfully."
+                                    dialogMessage = "Release deleted successfully."
                                     showDialog = true
                                 } else {
                                     dialogMessage = result?.message ?: "FAILED"

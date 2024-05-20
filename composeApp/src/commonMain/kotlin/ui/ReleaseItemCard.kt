@@ -276,7 +276,7 @@ fun RowTableTitleHeader(
 
 
             Row {
-                if (false){
+                if (isDeleteAllowed){
                     Icon(
                         modifier = Modifier.size(24.dp)
                             .clickable {

@@ -71,6 +71,8 @@ object CommonRepository {
             ?: (currentUser as? ObjUser)?.fields?.userid?.stringValue
     }
 
+    fun isCurrentUserAdmin():Boolean = (currentAdmin!=null)
+
     private val client = HttpClient() {
         install(Resources)
         install(ContentNegotiation) {
@@ -561,7 +563,8 @@ object CommonRepository {
 
         return try {
 
-            val httpResponse = client.delete(RELEASES.plus(user.fields?.projectId))
+            val httpResponse = client.delete(PROJECT.plus("/").plus(user.fields?.projectId?.stringValue?:user.fields?.projectName?.stringValue).plus("/").plus(
+                RELEASES).plus("/").plus(user.fields?.releaseId?.stringValue))
             logHttpResponse(httpResponse)
 
             if (httpResponse.status == HttpStatusCode.OK) {

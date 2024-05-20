@@ -53,9 +53,6 @@ import repository.models.data.ObjUser
 import ui.AppAlertDialog
 import ui.AppProgressBar
 import ui.ScreenHeaderWithTitle
-import ui.deleteProject
-import ui.deleteRelease
-import ui.deleteUser
 import ui.form_items.ComposableEdittext
 import ui.form_items.ComposableRadioGroup
 import ui.form_items.DateTimeComposable
